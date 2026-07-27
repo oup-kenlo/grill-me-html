@@ -34,17 +34,20 @@ Check answers, then **Submit round** (local waiter) or fall back to **Copy JSON*
 
 ## Install
 
-With the [`skills`](https://www.npmjs.com/package/skills) CLI:
+No npm package needed. Install straight from GitHub with the [`skills`](https://www.npmjs.com/package/skills) CLI:
 
 ```bash
-# project-level (recommended)
-npx skills add wuyuxiangX/grill-me-html --skill grill-me-html -y
+npx skills add wuyuxiangX/grill-me-html -y
+```
 
+That is enough for this repo (single skill). Optional variants:
+
+```bash
 # global
-npx skills add wuyuxiangX/grill-me-html --skill grill-me-html -g -y
+npx skills add wuyuxiangX/grill-me-html -g -y
 
-# from a local checkout
-npx skills add ./grill-me-html --skill grill-me-html -y
+# pin the skill name explicitly
+npx skills add wuyuxiangX/grill-me-html -s grill-me-html -y
 ```
 
 ## Requirements
