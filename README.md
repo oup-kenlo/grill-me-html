@@ -1,16 +1,14 @@
 # grill-me-html
 
-**Grill your design decisions in the browser — round by round.**
+Adaptive HTML questionnaires for design interviews.
 
-`grill-me-html` is an Agent Skill that turns plan/design interviews into adaptive HTML questionnaires.
+An agent skill that turns plan/design decisions into browser questionnaires:
 
-- Design tree + **frontier** rounds (only ask what is unblocked now)
+- Design tree, asked by **frontier** rounds
 - Soft branching inside a round (`visibleWhen`)
 - Recommended answers on every question
-- One-click **Submit round** (no paste by default)
-- Portable **auto-continue**: agent blocks on a local waiter, then continues when Submit exits 0
-
-Inspired by the “grill me / batch grill” idea of relentless design interviews — implemented as a real questionnaire surface instead of a terminal wall of questions.
+- **Submit round** writes answers locally — no paste by default
+- Agent continues after submit via a foreground waiter
 
 ## Screenshots
 
@@ -18,49 +16,37 @@ Inspired by the “grill me / batch grill” idea of relentless design interview
 
 ![Question round UI](docs/media/round-question.png)
 
-Frontier sidebar, recommended options, single/multi select, notes for the agent.
-
 ### Selected state
 
 ![Selected option](docs/media/option-selected.png)
-
-Clear selected feedback before auto-advancing or reviewing.
 
 ### Review + submit
 
 ![Review page](docs/media/review.png)
 
-Check answers, then **Submit round** (local waiter) or fall back to **Copy JSON**.
-
 ## Install
-
-No npm package needed. Install straight from GitHub with the [`skills`](https://www.npmjs.com/package/skills) CLI:
 
 ```bash
 npx skills add wuyuxiangX/grill-me-html -y
 ```
 
-That is enough for this repo (single skill). Optional variants:
+Global:
 
 ```bash
-# global
 npx skills add wuyuxiangX/grill-me-html -g -y
-
-# pin the skill name explicitly
-npx skills add wuyuxiangX/grill-me-html -s grill-me-html -y
 ```
 
 ## Requirements
 
-- Node.js 18+ (for the local waiter scripts)
-- A coding agent that can run a long foreground shell command (Pi, Claude Code, Cursor, Codex, …)
-- Browser on localhost (default handoff)
+- Node.js 18+
+- A coding agent that can run a long foreground shell command
+- Local browser access
 
-## Quick start (for agents)
+## Usage
 
-1. User describes a plan / feature / design.
-2. Agent builds a design tree and authors `.grill-me-html/config-01.json`.
-3. Agent runs (foreground, long timeout):
+1. Describe a plan or design.
+2. The agent writes `.grill-me-html/config-01.json`.
+3. The agent runs (foreground, long timeout):
 
 ```bash
 node "$SKILL_DIR/scripts/run-round.mjs" \
@@ -68,82 +54,16 @@ node "$SKILL_DIR/scripts/run-round.mjs" \
   --config .grill-me-html/config-01.json
 ```
 
-4. User answers in the browser and clicks **Submit round**.
-5. Process exits 0 and prints `RESULT {...}`.
-6. Agent reads `.grill-me-html/answers-01.json`, updates the tree, opens round 2 — or finishes with a shared-understanding summary.
+4. Answer in the browser and click **Submit round**.
+5. The process exits `0` and prints `RESULT {...}`.
+6. The agent reads `.grill-me-html/answers-01.json` and starts the next round, or finishes with a shared-understanding summary.
 
-Full contract: [`skills/grill-me-html/references/auto-continue.md`](./skills/grill-me-html/references/auto-continue.md)
+Details:
 
-## Repo layout
+- Auto-continue contract: [`skills/grill-me-html/references/auto-continue.md`](./skills/grill-me-html/references/auto-continue.md)
+- Config schema: [`skills/grill-me-html/references/config-schema.md`](./skills/grill-me-html/references/config-schema.md)
 
-```text
-grill-me-html/
-├── README.md
-├── LICENSE
-├── .gitignore
-├── docs/media/                 # README screenshots
-└── skills/
-    └── grill-me-html/
-        ├── SKILL.md
-        ├── scripts/
-        │   ├── run-round.mjs          # primary entry
-        │   └── serve-and-collect.mjs  # localhost waiter
-        ├── templates/
-        │   └── questionnaire.html
-        └── references/
-            ├── auto-continue.md
-            └── config-schema.md
-```
-
-This layout matches the common Agent Skills install shape:
-
-```bash
-npx skills add <owner>/<repo> --skill grill-me-html
-```
-
-## Manual smoke test
-
-```bash
-mkdir -p /tmp/grill-demo/.grill-me-html
-cat > /tmp/grill-demo/.grill-me-html/config-01.json <<'EOF'
-{
-  "skill": "grill-me-html",
-  "round": 1,
-  "title": "Smoke · Round 1",
-  "questions": [
-    {
-      "id": "ship",
-      "label": "Ship",
-      "prompt": "Ship this skill as a standalone repo?",
-      "type": "single",
-      "recommended": { "value": "yes", "reason": "It is already portable." },
-      "options": [
-        { "value": "yes", "label": "Yes" },
-        { "value": "no", "label": "Not yet" }
-      ]
-    }
-  ]
-}
-EOF
-
-cd /tmp/grill-demo
-node /path/to/grill-me-html/skills/grill-me-html/scripts/run-round.mjs \
-  --round 1 \
-  --config .grill-me-html/config-01.json
-```
-
-Answer in the browser → Submit → check `.grill-me-html/answers-01.json`.
-
-## What this is / isn’t
-
-| Is | Isn’t |
-|---|---|
-| A design-interview skill with HTML UX | A hosted survey SaaS |
-| Local-first, agent-driven | A cloud form backend |
-| Portable across coding agents | Pi-only / Claude-only |
-| Submit → continue via blocking waiter | Magic remote wake of idle agents |
-
-## Config sketch
+## Config example
 
 ```json
 {
@@ -170,13 +90,25 @@ Answer in the browser → Submit → check `.grill-me-html/answers-01.json`.
 }
 ```
 
-See [`skills/grill-me-html/references/config-schema.md`](./skills/grill-me-html/references/config-schema.md).
+## Layout
+
+```text
+grill-me-html/
+├── README.md
+├── LICENSE
+├── docs/media/
+└── skills/grill-me-html/
+    ├── SKILL.md
+    ├── scripts/
+    │   ├── run-round.mjs
+    │   └── serve-and-collect.mjs
+    ├── templates/
+    │   └── questionnaire.html
+    └── references/
+        ├── auto-continue.md
+        └── config-schema.md
+```
 
 ## License
 
 MIT
-
-## Credits
-
-- Interview rhythm inspired by public “grill me / batch grill” agent-skill patterns
-- Built as a standalone skill so any agent can install it without a blog monorepo
