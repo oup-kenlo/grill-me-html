@@ -343,6 +343,114 @@
       align-content: start;
     }
 
+    .choice-layout {
+      display: grid;
+      gap: var(--space-md);
+      align-content: start;
+      min-height: 0;
+    }
+
+    .choice-layout.preview {
+      grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.2fr);
+      gap: var(--space-md);
+      align-items: stretch;
+    }
+
+    .choice-layout.preview .options {
+      min-width: 0;
+      align-content: start;
+    }
+
+    .preview-pane {
+      min-width: 0;
+      min-height: 280px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--bg);
+      display: grid;
+      grid-template-rows: auto 1fr;
+      overflow: hidden;
+    }
+
+    .preview-pane-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-sm);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: var(--card);
+    }
+
+    .preview-pane-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .preview-pane-body {
+      min-height: 0;
+      overflow: auto;
+      padding: var(--space-md);
+      background:
+        linear-gradient(45deg, #f3f3f3 25%, transparent 25%),
+        linear-gradient(-45deg, #f3f3f3 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #f3f3f3 75%),
+        linear-gradient(-45deg, transparent 75%, #f3f3f3 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+      background-color: #fafafa;
+    }
+
+    .preview-empty {
+      display: grid;
+      gap: 6px;
+      place-content: center;
+      min-height: 220px;
+      text-align: center;
+      color: var(--ink-muted);
+      font-size: 14px;
+      padding: var(--space-lg);
+      background: var(--card);
+      border: 1px dashed var(--line);
+      border-radius: var(--radius-md);
+    }
+
+    .preview-empty strong {
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .preview-text {
+      margin: 0;
+      font-family: var(--mono);
+      font-size: 12.5px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 14px;
+    }
+
+    .preview-html-frame {
+      width: 100%;
+      min-height: 240px;
+      height: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--card);
+      display: block;
+    }
+
     .option {
       position: relative;
       width: 100%;
@@ -352,6 +460,12 @@
       background: var(--card);
       padding: 14px 14px 14px 44px;
       transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+    }
+
+    .option.focused:not(.selected) {
+      border-color: var(--line-hover);
+      background: var(--bg);
+      box-shadow: inset 3px 0 0 var(--line-hover);
     }
 
     .option:hover {
@@ -383,7 +497,8 @@
       place-items: center;
     }
 
-    .option.single .mark { border-radius: var(--radius-full); }
+    .option.single .mark,
+    .option.preview .mark { border-radius: var(--radius-full); }
     .option.multi .mark { border-radius: 3px; }
 
     .option.selected .mark {
@@ -391,7 +506,8 @@
       background: var(--ink);
     }
 
-    .option.single.selected .mark::after {
+    .option.single.selected .mark::after,
+    .option.preview.selected .mark::after {
       content: "";
       width: 6px;
       height: 6px;
@@ -662,6 +778,12 @@
         min-height: 0;
         padding: var(--space-md);
       }
+      .choice-layout.preview {
+        grid-template-columns: 1fr;
+      }
+      .preview-pane {
+        min-height: 220px;
+      }
       .footer {
         flex-direction: column;
         align-items: stretch;
@@ -691,6 +813,7 @@
         <div class="meta" id="progressBadge"><strong>0</strong> / 0 answered</div>
       </div>
     </header>
+
 
     <div class="layout">
       <aside class="panel sidebar" aria-label="Round questions">
@@ -727,7 +850,7 @@
         skill: "grill-me-html",
         round: 1,
         title: "Demo: Blog comments · Round 1",
-        subtitle: "Settle upstream product boundaries. This is the template demo; real runs inject a live config.",
+        subtitle: "Frontier only. Architecture is a preview question — hover options to see system diagrams.",
         theme: "plain",
         locale: "en",
         questions: [
@@ -775,26 +898,36 @@
             ]
           },
           {
-            id: "nesting",
-            label: "Nesting",
-            prompt: "Should comments support nested replies?",
-            why: "Affects data model and UI complexity.",
-            type: "single",
+            id: "architecture",
+            label: "Architecture",
+            prompt: "Which architecture for the comments subsystem in v1?",
+            why: "This is a visual architecture choice — compare the system diagrams, then pick.",
+            type: "preview",
             recommended: {
-              value: "one-level",
-              reason: "One reply level is usually enough and stays cheap."
+              value: "modular-monolith",
+              reason: "One deploy for v1, but module seams keep a future split cheap."
             },
             options: [
-              { value: "flat", label: "Flat", description: "A single list only." },
               {
-                value: "one-level",
-                label: "One-level replies",
-                description: "Reply to a comment, no deep threads."
+                value: "monolith",
+                label: "Classic monolith",
+                description: "One app, shared modules, single database.",
+                previewFormat: "html",
+                preview: '<div style="font:12px/1.4 system-ui;color:#0a0a0a"><div style="font-weight:700;margin-bottom:10px">Monolith</div><div style="border:1px solid #e5e5e5;border-radius:10px;padding:12px;background:#fff"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px"><div style="border:1px solid #e5e5e5;border-radius:8px;padding:10px;text-align:center;background:#fafafa">Web</div><div style="border:1px solid #e5e5e5;border-radius:8px;padding:10px;text-align:center;background:#fafafa">API routes</div><div style="border:1px solid #e5e5e5;border-radius:8px;padding:10px;text-align:center;background:#fafafa">Workers</div></div><div style="border:2px solid #0a0a0a;border-radius:8px;padding:14px;text-align:center;background:#f5f5f5"><strong>Single app process</strong><div style="color:#737373;margin-top:4px">comments · auth · moderation · render</div></div><div style="margin-top:10px;border:1px solid #e5e5e5;border-radius:8px;padding:10px;text-align:center">Postgres</div></div><div style="color:#737373;margin-top:8px">One deploy unit. Simple ops. Shared DB transactions.</div></div>'
               },
               {
-                value: "infinite",
-                label: "Infinite nesting",
-                description: "Full thread trees."
+                value: "modular-monolith",
+                label: "Modular monolith",
+                description: "One process with hard module boundaries and owned tables.",
+                previewFormat: "html",
+                preview: '<div style="font:12px/1.4 system-ui;color:#0a0a0a"><div style="font-weight:700;margin-bottom:10px">Modular monolith</div><div style="border:1px solid #e5e5e5;border-radius:10px;padding:12px;background:#fff"><div style="text-align:center;margin-bottom:8px;color:#737373">One process · hard module boundaries</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div style="border:1px solid #0a0a0a;border-radius:8px;padding:10px"><strong>Identity</strong><div style="color:#737373;margin-top:4px">authz · sessions</div></div><div style="border:1px solid #0a0a0a;border-radius:8px;padding:10px"><strong>Comments</strong><div style="color:#737373;margin-top:4px">CRUD · nesting</div></div><div style="border:1px solid #0a0a0a;border-radius:8px;padding:10px"><strong>Moderation</strong><div style="color:#737373;margin-top:4px">filters · queue</div></div><div style="border:1px solid #0a0a0a;border-radius:8px;padding:10px"><strong>Notify</strong><div style="color:#737373;margin-top:4px">later</div></div></div><div style="margin-top:10px;border:1px solid #e5e5e5;border-radius:8px;padding:10px;text-align:center">Postgres <span style="color:#737373">(schema-owned tables)</span></div></div><div style="color:#737373;margin-top:8px">Still one deploy. Clear seams if you split later.</div></div>'
+              },
+              {
+                value: "services",
+                label: "Split services",
+                description: "Comments and moderation as separate services.",
+                previewFormat: "html",
+                preview: '<div style="font:12px/1.4 system-ui;color:#0a0a0a"><div style="font-weight:700;margin-bottom:10px">Services</div><div style="border:1px solid #e5e5e5;border-radius:10px;padding:12px;background:#fff"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px"><div style="border:1px solid #e5e5e5;border-radius:8px;padding:10px;text-align:center">Web BFF</div><div style="border:1px solid #0a0a0a;border-radius:8px;padding:10px;text-align:center;background:#f5f5f5"><strong>Comments svc</strong></div><div style="border:1px solid #0a0a0a;border-radius:8px;padding:10px;text-align:center;background:#f5f5f5"><strong>Moderation svc</strong></div></div><div style="display:flex;justify-content:center;gap:8px;align-items:center;color:#737373;margin-bottom:10px"><span>events / HTTP</span><span style="border-top:1px dashed #a3a3a3;flex:1"></span><span>queue</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div style="border:1px solid #e5e5e5;border-radius:8px;padding:10px;text-align:center">Comments DB</div><div style="border:1px solid #e5e5e5;border-radius:8px;padding:10px;text-align:center">Moderation DB</div></div></div><div style="color:#737373;margin-top:8px">Independent scale. More ops + consistency cost for v1.</div></div>'
               }
             ]
           },
@@ -821,6 +954,7 @@
         index: 0,
         mode: "question", // question | review | done
         answers: {},
+        focusValue: null, // option currently shown in preview pane
         toastTimer: null,
         submitting: false,
         submitResult: null
@@ -898,6 +1032,72 @@
         return [];
       }
 
+      function isMulti(q) {
+        return q && q.type === "multi";
+      }
+
+      function isPreview(q) {
+        return q && q.type === "preview";
+      }
+
+      function typeLabel(q) {
+        if (isMulti(q)) return "Multi-select";
+        if (isPreview(q)) return "Preview";
+        return "Single-select";
+      }
+
+      function typeHint(q) {
+        if (isMulti(q)) return "Pick one or more";
+        if (isPreview(q)) return "Hover to preview · click to choose";
+        return "Pick one";
+      }
+
+      function resolvePreviewFormat(opt) {
+        const raw = (opt && opt.previewFormat) || "auto";
+        if (raw === "html" || raw === "text") return raw;
+        const preview = String((opt && opt.preview) || "").trim();
+        return preview.startsWith("<") ? "html" : "text";
+      }
+
+      function wrapPreviewHtml(fragment) {
+        // Sandboxed offline fragment: inherit system fonts, no external assets.
+        // Escape "</" as \u003c/ so HTML parsers never treat these as real end tags
+        // if a tool does a naive first-match inject on the page source.
+        return `<!DOCTYPE html><html><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><style>
+html, body { margin: 0; padding: 0; background: #fff; color: #0a0a0a; }
+body { font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Helvetica Neue", Arial, sans-serif; padding: 12px; }
+* { box-sizing: border-box; }
+img, svg, video, canvas { max-width: 100%; height: auto; }
+</style></head><body>${fragment}\u003c/body>\u003c/html>`;
+      }
+
+      function findOption(q, value) {
+        return (q.options || []).find((o) => o.value === value) || null;
+      }
+
+      function resolveFocusValue(q) {
+        if (!q) return null;
+        const opts = visibleOptions(q);
+        if (!opts.length) return null;
+        const ans = getAnswer(q.id);
+        if (state.focusValue && opts.some((o) => o.value === state.focusValue)) {
+          return state.focusValue;
+        }
+        if (ans.values && ans.values.length) {
+          const hit = ans.values.find((v) => opts.some((o) => o.value === v));
+          if (hit) return hit;
+        }
+        const rec = recommendedValues(q).find((v) =>
+          opts.some((o) => o.value === v)
+        );
+        return rec || opts[0].value;
+      }
+
+      function setFocusValue(value) {
+        if (state.focusValue === value) return;
+        state.focusValue = value;
+      }
+
       function isAnswered(q) {
         if (!isQuestionVisible(q)) return false;
         const ans = getAnswer(q.id);
@@ -952,15 +1152,16 @@
           return;
         }
         setAnswer(q.id, {
-          values: q.type === "multi" ? vals : [vals[0]],
+          values: isMulti(q) ? vals : [vals[0]],
           customText: ""
         });
+        if (!isMulti(q)) setFocusValue(vals[0]);
         render();
       }
 
       function toggleOption(q, value) {
         const ans = getAnswer(q.id);
-        if (q.type === "multi") {
+        if (isMulti(q)) {
           const set = new Set(ans.values);
           if (set.has(value)) set.delete(value);
           else set.add(value);
@@ -973,8 +1174,9 @@
           return;
         }
 
-        // Single-select: select, show feedback, then advance when possible.
+        // Single / preview: select, show feedback, then advance when possible.
         setAnswer(q.id, { values: [value], customText: "" });
+        setFocusValue(value);
         pruneInvisibleAnswers();
         const label = optionLabel(q, value);
         toast(`Selected: ${label}`);
@@ -984,6 +1186,8 @@
         render();
 
         // Soft-branching may change the list; re-find current question and advance.
+        // Preview stays a beat longer so the user can still see the chosen mock.
+        const delay = isPreview(q) ? 420 : 220;
         const qs = visibleQuestions();
         const idx = qs.findIndex((item) => item.id === q.id);
         if (idx >= 0 && idx < qs.length - 1 && state.mode === "question") {
@@ -992,12 +1196,55 @@
             const still = currentQuestion();
             if (still && still.id === q.id && state.mode === "question") {
               state.index = idx + 1;
+              state.focusValue = null;
               render();
             }
-          }, 220);
+          }, delay);
         } else if (idx === qs.length - 1 || idxBefore === qsBefore.length - 1) {
           // Last visible question: stay put with strong selected state.
         }
+      }
+
+      function renderPreviewBody(opt) {
+        // Returns either an HTML string (text/empty) or { kind:"html", srcdoc } for DOM mount.
+        if (!opt || !(opt.preview || "").trim()) {
+          return {
+            kind: "html-string",
+            html: `
+            <div class="preview-empty">
+              <strong>No preview available</strong>
+              <span>This option is missing preview content.</span>
+            </div>`
+          };
+        }
+        const format = resolvePreviewFormat(opt);
+        if (format === "html") {
+          return {
+            kind: "iframe",
+            srcdoc: wrapPreviewHtml(String(opt.preview))
+          };
+        }
+        return {
+          kind: "html-string",
+          html: `<pre class="preview-text">${escapeHtml(opt.preview)}</pre>`
+        };
+      }
+
+      function mountPreviewBody(container, opt) {
+        if (!container) return;
+        const body = renderPreviewBody(opt);
+        if (body.kind === "iframe") {
+          container.innerHTML = "";
+          const frame = document.createElement("iframe");
+          frame.className = "preview-html-frame";
+          frame.title = "Option preview";
+          // No tokens: scripts cannot run; forms/popups blocked.
+          frame.setAttribute("sandbox", "");
+          frame.srcdoc = body.srcdoc;
+          container.appendChild(frame);
+          return;
+        }
+        container.innerHTML = body.html;
       }
 
       function buildExport() {
@@ -1197,6 +1444,7 @@
           btn.addEventListener("click", () => {
             state.mode = "question";
             state.index = visible.findIndex((x) => x.id === q.id);
+            state.focusValue = null;
             render();
           });
           li.appendChild(btn);
@@ -1233,6 +1481,10 @@
         const ans = getAnswer(q.id);
         const recVals = new Set(recommendedValues(q));
         const opts = visibleOptions(q);
+        const previewMode = isPreview(q);
+        const focusValue = previewMode ? resolveFocusValue(q) : null;
+        if (previewMode) state.focusValue = focusValue;
+        const focusedOpt = previewMode ? findOption(q, focusValue) : null;
 
         const recReason =
           q.recommended && q.recommended.reason
@@ -1246,13 +1498,15 @@
           .map((opt) => {
             const selected = ans.values.includes(opt.value);
             const isRec = recVals.has(opt.value);
+            const focused = previewMode && opt.value === focusValue;
             return `
               <button type="button"
                 class="option ${q.type} ${selected ? "selected" : ""} ${
               isRec ? "recommended" : ""
-            }"
+            } ${focused ? "focused" : ""}"
                 data-value="${escapeAttr(opt.value)}"
-                aria-pressed="${selected ? "true" : "false"}">
+                aria-pressed="${selected ? "true" : "false"}"
+                ${focused ? 'aria-current="true"' : ""}>
                 <span class="mark" aria-hidden="true"></span>
                 <div class="option-title">
                   <span>${escapeHtml(opt.label)}</span>
@@ -1268,20 +1522,41 @@
           })
           .join("");
 
+        const previewHtml = previewMode
+          ? `
+            <aside class="preview-pane" aria-live="polite">
+              <div class="preview-pane-head">
+                <div class="preview-pane-title">${escapeHtml(
+                  focusedOpt ? focusedOpt.label : "Preview"
+                )}</div>
+                <span class="pill">${
+                  focusedOpt
+                    ? resolvePreviewFormat(focusedOpt) === "html"
+                      ? "Live mock"
+                      : "Text preview"
+                    : "Preview"
+                }</span>
+              </div>
+              <div class="preview-pane-body" id="previewBody"></div>
+            </aside>`
+          : "";
+
         el.main.innerHTML = `
           <div class="question-head">
             <div class="question-meta">
               <span class="pill emphasis">Q${state.index + 1} / ${qs.length}</span>
-              <span class="pill">${
-                q.type === "multi" ? "Multi-select" : "Single-select"
-              }</span>
+              <span class="pill">${typeLabel(q)}</span>
               ${recVals.size ? '<span class="pill">Has recommendation</span>' : ""}
+              ${previewMode ? '<span class="pill">See before choose</span>' : ""}
             </div>
             <h2 class="prompt">${escapeHtml(q.prompt)}</h2>
             ${why}
             ${recReason}
           </div>
-          <div class="options" id="options">${optionsHtml}</div>
+          <div class="choice-layout ${previewMode ? "preview" : ""}" id="choiceLayout">
+            <div class="options" id="options" role="listbox" aria-label="Options">${optionsHtml}</div>
+            ${previewHtml}
+          </div>
           <div class="fields">
             <div class="field">
               <label for="customText">Write your own (optional)</label>
@@ -1304,9 +1579,7 @@
               <button class="btn ghost" id="btnRec">Use recommendation</button>
             </div>
             <div class="footer-right">
-              <span class="hint">${
-                q.type === "multi" ? "Pick one or more" : "Pick one"
-              }</span>
+              <span class="hint">${typeHint(q)}</span>
               ${
                 state.index >= qs.length - 1
                   ? ""
@@ -1319,17 +1592,47 @@
           </div>
         `;
 
+        if (previewMode) {
+          mountPreviewBody(document.getElementById("previewBody"), focusedOpt);
+        }
+
+        const updatePreviewPane = (value) => {
+          if (!previewMode) return;
+          const opt = findOption(q, value);
+          setFocusValue(value);
+          el.main.querySelectorAll(".option").forEach((node) => {
+            const active = node.getAttribute("data-value") === value;
+            node.classList.toggle("focused", active);
+            if (active) node.setAttribute("aria-current", "true");
+            else node.removeAttribute("aria-current");
+          });
+          const title = el.main.querySelector(".preview-pane-title");
+          const badge = el.main.querySelector(".preview-pane-head .pill");
+          if (title) title.textContent = opt ? opt.label : "Preview";
+          if (badge) {
+            badge.textContent = opt
+              ? resolvePreviewFormat(opt) === "html"
+                ? "Live mock"
+                : "Text preview"
+              : "Preview";
+          }
+          mountPreviewBody(document.getElementById("previewBody"), opt);
+        };
+
         el.main.querySelectorAll(".option").forEach((node) => {
-          node.addEventListener("click", () =>
-            toggleOption(q, node.getAttribute("data-value"))
-          );
+          const value = node.getAttribute("data-value");
+          node.addEventListener("click", () => toggleOption(q, value));
+          if (previewMode) {
+            node.addEventListener("mouseenter", () => updatePreviewPane(value));
+            node.addEventListener("focus", () => updatePreviewPane(value));
+          }
         });
 
         const custom = document.getElementById("customText");
         const note = document.getElementById("noteText");
         custom.addEventListener("input", () => {
           const text = custom.value;
-          if (q.type === "single" && text.trim()) {
+          if (!isMulti(q) && text.trim()) {
             setAnswer(q.id, {
               values: [],
               customText: text,
@@ -1352,11 +1655,15 @@
 
         document.getElementById("btnPrev").onclick = () => {
           state.index = Math.max(0, state.index - 1);
+          state.focusValue = null;
           render();
         };
         document.getElementById("btnNext").onclick = () => {
           if (state.index >= qs.length - 1) state.mode = "review";
-          else state.index += 1;
+          else {
+            state.index += 1;
+            state.focusValue = null;
+          }
           render();
         };
         const reviewBtn = document.getElementById("btnReview");
@@ -1452,10 +1759,14 @@
               <button class="btn" id="backToQ">Back to questions</button>
             </div>
             <div class="footer-right">
-              <button class="btn" id="copyJson">Copy JSON</button>
-              <button class="btn primary" id="submitRound" ${
-                state.submitting ? "disabled" : ""
-              }>${submitLabel}</button>
+              ${
+                server
+                  ? '<button class="btn" id="copyJson">Copy JSON</button>' +
+                    `<button class="btn primary" id="submitRound" ${
+                      state.submitting ? "disabled" : ""
+                    }>Submit round</button>`
+                  : `<button class="btn primary" id="submitRound">${submitLabel}</button>`
+              }
             </div>
           </div>
         `;
@@ -1465,6 +1776,7 @@
             const id = btn.getAttribute("data-jump");
             state.mode = "question";
             state.index = visible.findIndex((q) => q.id === id);
+            state.focusValue = null;
             render();
           });
         });
@@ -1472,7 +1784,8 @@
           state.mode = "question";
           render();
         };
-        document.getElementById("copyJson").onclick = copyJson;
+        const copyBtn = document.getElementById("copyJson");
+        if (copyBtn) copyBtn.onclick = copyJson;
         document.getElementById("submitRound").onclick = submitRound;
       }
 

@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shared understanding</title>
+  <style>
+    :root {
+      --bg: #fafafa;
+      --card: #ffffff;
+      --muted: #f5f5f5;
+      --ink: #0a0a0a;
+      --ink-muted: #737373;
+      --ink-subtle: #a3a3a3;
+      --line: #e5e5e5;
+      --line-hover: #d4d4d4;
+      --accent: #0a0a0a;
+      --accent-fg: #ffffff;
+      --success: #16a34a;
+      --success-bg: #f0fdf4;
+      --warning: #b45309;
+      --warning-bg: #fffbeb;
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-full: 9999px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --space-2xl: 48px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Noto Sans SC", "Helvetica Neue", Arial, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      --content: 1080px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--ink);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
+
+    .app {
+      max-width: var(--content);
+      margin: 0 auto;
+      padding: var(--space-xl) var(--space-md) var(--space-2xl);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-lg);
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-lg);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: var(--space-sm);
+    }
+
+    .kicker-mark {
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      background: var(--ink);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 3vw, 36px);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      max-width: 62ch;
+      color: var(--ink-muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      justify-content: flex-end;
+    }
+
+    .meta, .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-full);
+      background: var(--card);
+      color: var(--ink-muted);
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .pill.ok {
+      color: var(--success);
+      background: var(--success-bg);
+      border-color: #bbf7d0;
+    }
+
+    .pill.warn {
+      color: var(--warning);
+      background: var(--warning-bg);
+      border-color: #fde68a;
+    }
+
+    .layout {
+      display: grid;
+      gap: var(--space-lg);
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+    }
+
+    .panel h2 {
+      margin: 0 0 var(--space-md);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    .summary-text {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.7;
+      max-width: 72ch;
+      white-space: pre-wrap;
+    }
+
+    .confirm-box {
+      margin-top: var(--space-md);
+      padding: var(--space-md);
+      border: 1px dashed var(--line-hover);
+      border-radius: var(--radius-md);
+      background: var(--muted);
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .confirm-box strong { font-weight: 600; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: var(--space-lg);
+      align-items: start;
+    }
+
+    .decision-list {
+      display: grid;
+      gap: var(--space-sm);
+    }
+
+    .decision-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      background: var(--card);
+      display: grid;
+      gap: 6px;
+    }
+
+    .decision-card header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .decision-card h3 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .decision-card .choice {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .decision-card .reason,
+    .decision-card .impl {
+      margin: 0;
+      color: var(--ink-muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .decision-card ul {
+      margin: 0;
+      padding-left: 1.1em;
+      color: var(--ink-muted);
+      font-size: 14px;
+    }
+
+    .list-plain {
+      margin: 0;
+      padding-left: 1.15em;
+      display: grid;
+      gap: 6px;
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    /* Context / tree — shared visual language with questionnaire */
+    .context-block {
+      display: grid;
+      gap: var(--space-md);
+    }
+
+    .context-summary {
+      margin: 0;
+      color: var(--ink-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .visual-grid {
+      display: grid;
+      gap: var(--space-md);
+    }
+
+    .visual-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .visual-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: var(--card);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .visual-card-body {
+      padding: var(--space-md);
+    }
+
+    .visual-text {
+      margin: 0;
+      font-family: var(--mono);
+      font-size: 12.5px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--ink);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 14px;
+    }
+
+    .visual-html-frame {
+      width: 100%;
+      min-height: 180px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--card);
+      display: block;
+    }
+
+    .tree {
+      display: grid;
+      gap: 6px;
+    }
+
+    .tree-node {
+      display: grid;
+      grid-template-columns: 10px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--card);
+    }
+
+    .tree-node .dot {
+      width: 10px;
+      height: 10px;
+      margin-top: 5px;
+      border-radius: var(--radius-full);
+      background: var(--ink-subtle);
+    }
+
+    .tree-node.settled .dot { background: var(--success); }
+    .tree-node.frontier .dot { background: var(--ink); }
+    .tree-node.blocked .dot { background: var(--warning); }
+    .tree-node.open .dot { background: var(--ink-subtle); }
+
+    .tree-node.frontier {
+      border-color: var(--ink);
+      box-shadow: inset 3px 0 0 var(--ink);
+    }
+
+    .tree-node.settled {
+      background: #fcfcfc;
+    }
+
+    .tree-label {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    .tree-detail {
+      margin-top: 2px;
+      color: var(--ink-muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .tree-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .depth-1 { margin-left: 18px; }
+    .depth-2 { margin-left: 36px; }
+    .depth-3 { margin-left: 54px; }
+    .depth-4 { margin-left: 72px; }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      margin-bottom: 4px;
+    }
+
+    .footer-note {
+      color: var(--ink-subtle);
+      font-size: 12px;
+      text-align: center;
+      margin-top: var(--space-lg);
+    }
+
+    .empty {
+      color: var(--ink-muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 860px) {
+      .app { padding: var(--space-md) var(--space-sm) var(--space-2xl); }
+      .topbar { flex-direction: column; }
+      .meta-row { justify-content: flex-start; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .depth-1, .depth-2, .depth-3, .depth-4 { margin-left: 12px; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .app { max-width: none; padding: 0; }
+      .panel, .decision-card, .tree-node, .visual-card { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <div class="empty">Loading shared understanding…</div>
+  </div>
+
+  <script>
+    window.SUMMARY_CONFIG = /*__SUMMARY_CONFIG__*/ null;
+  </script>
+
+  <script>
+    (function () {
+      const DEMO = {
+        skill: "grill-me-html",
+        title: "Shared understanding · Blog comments",
+        subtitle: "Demo summary page. Real runs inject a live config after the interview ends.",
+        status: "ready",
+        generatedAt: new Date().toISOString(),
+        summary:
+          "V1 comments are for logged-in users only, with one-level replies and post-then-review moderation. Guests stay read-only. This keeps spam cost low while still supporting conversation under posts.",
+        confirmPrompt:
+          "Confirm this shared understanding before implementation. Reply \"looks good\" / \"confirmed\" or list changes.",
+        context: {
+          title: "Final design map",
+          summary: "Settled product boundaries for the comments subsystem.",
+          tree: {
+            title: "Decision tree",
+            nodes: [
+              {
+                id: "who",
+                label: "Who can comment",
+                status: "settled",
+                detail: "Logged-in users only"
+              },
+              {
+                id: "nesting",
+                label: "Thread depth",
+                status: "settled",
+                detail: "One-level replies",
+                parentId: "who"
+              },
+              {
+                id: "mod",
+                label: "Moderation",
+                status: "settled",
+                detail: "Post then review",
+                parentId: "who"
+              },
+              {
+                id: "notify",
+                label: "Notifications",
+                status: "blocked",
+                detail: "Deferred to a later product pass",
+                parentId: "nesting"
+              }
+            ]
+          },
+          visuals: [
+            {
+              title: "System sketch",
+              format: "html",
+              content:
+                '<div style="font:13px system-ui;display:grid;gap:10px"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px"><div style="border:1px solid #e5e5e5;border-radius:8px;padding:10px;background:#fff"><strong>Web</strong><div style="color:#737373;margin-top:4px">Post page + thread UI</div></div><div style="border:1px solid #e5e5e5;border-radius:8px;padding:10px;background:#fff"><strong>API</strong><div style="color:#737373;margin-top:4px">Comments CRUD + authz</div></div><div style="border:1px solid #e5e5e5;border-radius:8px;padding:10px;background:#fff"><strong>DB</strong><div style="color:#737373;margin-top:4px">comments + parent_id</div></div></div><div style="color:#737373">Auth gate → create comment → optional keyword filter → render one-level thread</div></div>'
+            }
+          ]
+        },
+        decisions: [
+          {
+            id: "who",
+            label: "Who can post",
+            decision: "Logged-in users only",
+            reason: "Lower spam cost; guests stay read-only for v1.",
+            implications: ["Auth required on write path", "Guest UI is read-only"],
+            round: 1,
+            status: "settled"
+          },
+          {
+            id: "nesting",
+            label: "Thread UI",
+            decision: "One-level replies",
+            reason: "Enough conversation without deep-tree complexity.",
+            implications: ["parent_id nullable once", "No recursive collapse UI"],
+            round: 1,
+            status: "settled"
+          },
+          {
+            id: "mod",
+            label: "Moderation",
+            decision: "Post then review",
+            reason: "Keep discussion fluid; keyword filter + manual delete as backstop.",
+            round: 1,
+            status: "settled"
+          }
+        ],
+        openQuestions: [],
+        nextSteps: [
+          "Add comments table with parent_id and author_id",
+          "Ship post-page thread UI (one-level)",
+          "Add basic keyword filter + admin delete"
+        ]
+      };
+
+      function escapeHtml(str) {
+        return String(str ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function resolveFormat(item) {
+        const raw = (item && item.format) || "auto";
+        if (raw === "html" || raw === "text") return raw;
+        const content = String((item && item.content) || "").trim();
+        return content.startsWith("<") ? "html" : "text";
+      }
+
+      function wrapHtml(fragment) {
+        return `<!DOCTYPE html><html><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><style>
+html,body{margin:0;padding:0;background:#fff;color:#0a0a0a}
+body{font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Noto Sans SC","Helvetica Neue",Arial,sans-serif;padding:12px}
+*{box-sizing:border-box}
+img,svg,video,canvas{max-width:100%;height:auto}
+</style></head><body>${fragment}\u003c/body>\u003c/html>`;
+      }
+
+      function mountVisual(container, item) {
+        if (!container || !item) return;
+        const format = resolveFormat(item);
+        if (format === "html") {
+          container.innerHTML = "";
+          const frame = document.createElement("iframe");
+          frame.className = "visual-html-frame";
+          frame.title = item.title || "Visual";
+          frame.setAttribute("sandbox", "");
+          frame.srcdoc = wrapHtml(String(item.content || ""));
+          container.appendChild(frame);
+          return;
+        }
+        container.innerHTML = `<pre class="visual-text">${escapeHtml(item.content || "")}</pre>`;
+      }
+
+      function treeDepths(nodes) {
+        const byId = new Map((nodes || []).map((n) => [n.id, n]));
+        const depth = new Map();
+        function d(id, stack) {
+          if (depth.has(id)) return depth.get(id);
+          if (stack.has(id)) return 0;
+          const n = byId.get(id);
+          if (!n || !n.parentId || !byId.has(n.parentId)) {
+            depth.set(id, 0);
+            return 0;
+          }
+          stack.add(id);
+          const val = Math.min(4, d(n.parentId, stack) + 1);
+          stack.delete(id);
+          depth.set(id, val);
+          return val;
+        }
+        for (const n of nodes || []) d(n.id, new Set());
+        return depth;
+      }
+
+      function sortTree(nodes) {
+        const list = (nodes || []).slice();
+        const byParent = new Map();
+        for (const n of list) {
+          const key = n.parentId || "";
+          if (!byParent.has(key)) byParent.set(key, []);
+          byParent.get(key).push(n);
+        }
+        const out = [];
+        function walk(parentId) {
+          const kids = byParent.get(parentId || "") || [];
+          for (const kid of kids) {
+            out.push(kid);
+            walk(kid.id);
+          }
+        }
+        walk("");
+        // orphans / cycles fallback
+        for (const n of list) if (!out.includes(n)) out.push(n);
+        return out;
+      }
+
+      function renderTree(tree) {
+        if (!tree || !Array.isArray(tree.nodes) || !tree.nodes.length) return "";
+        const depths = treeDepths(tree.nodes);
+        const ordered = sortTree(tree.nodes);
+        const nodesHtml = ordered
+          .map((n) => {
+            const status = n.status || "open";
+            const depth = depths.get(n.id) || 0;
+            return `
+              <div class="tree-node ${escapeHtml(status)} depth-${depth}">
+                <span class="dot" aria-hidden="true"></span>
+                <div>
+                  <div class="tree-label">${escapeHtml(n.label || n.id)}</div>
+                  ${
+                    n.detail
+                      ? `<div class="tree-detail">${escapeHtml(n.detail)}</div>`
+                      : ""
+                  }
+                  <div class="tree-meta">
+                    <span class="pill">${escapeHtml(status)}</span>
+                    ${n.id ? `<span class="pill">${escapeHtml(n.id)}</span>` : ""}
+                  </div>
+                </div>
+              </div>`;
+          })
+          .join("");
+        return `
+          <div>
+            <div class="legend">
+              <span class="pill">settled</span>
+              <span class="pill">frontier</span>
+              <span class="pill">blocked</span>
+              <span class="pill">open</span>
+            </div>
+            <div class="tree" aria-label="${escapeHtml(tree.title || "Design tree")}">
+              ${nodesHtml}
+            </div>
+          </div>`;
+      }
+
+      function renderContext(ctx, mountIds) {
+        if (!ctx) return "";
+        const visuals = Array.isArray(ctx.visuals) ? ctx.visuals : [];
+        const visualHtml = visuals
+          .map((v, i) => {
+            const id = `visual-${i}`;
+            mountIds.push({ id, item: v });
+            return `
+              <div class="visual-card">
+                <div class="visual-card-head">
+                  <span>${escapeHtml(v.title || `Visual ${i + 1}`)}</span>
+                  <span class="pill">${resolveFormat(v)}</span>
+                </div>
+                <div class="visual-card-body" id="${id}"></div>
+              </div>`;
+          })
+          .join("");
+        return `
+          <section class="panel">
+            <h2>${escapeHtml(ctx.title || "Context")}</h2>
+            <div class="context-block">
+              ${
+                ctx.summary
+                  ? `<p class="context-summary">${escapeHtml(ctx.summary)}</p>`
+                  : ""
+              }
+              ${ctx.tree ? renderTree(ctx.tree) : ""}
+              ${
+                visualHtml
+                  ? `<div class="visual-grid">${visualHtml}</div>`
+                  : ""
+              }
+            </div>
+          </section>`;
+      }
+
+      function statusPill(status) {
+        if (status === "ready") return '<span class="pill ok">Ready to confirm</span>';
+        if (status === "draft") return '<span class="pill warn">Draft</span>';
+        return `<span class="pill">${escapeHtml(status || "ready")}</span>`;
+      }
+
+      function render(config) {
+        const app = document.getElementById("app");
+        const decisions = Array.isArray(config.decisions) ? config.decisions : [];
+        const openQuestions = Array.isArray(config.openQuestions)
+          ? config.openQuestions
+          : [];
+        const nextSteps = Array.isArray(config.nextSteps) ? config.nextSteps : [];
+        const mountIds = [];
+        const when = config.generatedAt
+          ? new Date(config.generatedAt).toLocaleString()
+          : new Date().toLocaleString();
+
+        document.title = config.title || "Shared understanding";
+
+        app.innerHTML = `
+          <header class="topbar">
+            <div>
+              <div class="kicker">
+                <span class="kicker-mark" aria-hidden="true"></span>
+                Grill Me HTML · Shared understanding
+              </div>
+              <h1>${escapeHtml(config.title || "Shared understanding")}</h1>
+              ${
+                config.subtitle
+                  ? `<p class="subtitle">${escapeHtml(config.subtitle)}</p>`
+                  : ""
+              }
+            </div>
+            <div class="meta-row">
+              ${statusPill(config.status || "ready")}
+              <span class="meta">${escapeHtml(when)}</span>
+              <span class="meta"><strong>${decisions.length}</strong>&nbsp;decisions</span>
+            </div>
+          </header>
+
+          <div class="layout">
+            <section class="panel">
+              <h2>Summary</h2>
+              <p class="summary-text">${escapeHtml(
+                config.summary || "No summary provided."
+              )}</p>
+              <div class="confirm-box">
+                <strong>Before implementation:</strong>
+                ${escapeHtml(
+                  config.confirmPrompt ||
+                    'Confirm this shared understanding, or list the changes you want.'
+                )}
+              </div>
+            </section>
+
+            ${renderContext(config.context, mountIds)}
+
+            <div class="grid-2">
+              <section class="panel">
+                <h2>Settled decisions</h2>
+                <div class="decision-list">
+                  ${
+                    decisions.length
+                      ? decisions
+                          .map((d) => {
+                            const impl = Array.isArray(d.implications)
+                              ? d.implications
+                              : [];
+                            return `
+                            <article class="decision-card">
+                              <header>
+                                <h3>${escapeHtml(d.label || d.id)}</h3>
+                                <div class="meta-row" style="justify-content:flex-end">
+                                  ${
+                                    d.status
+                                      ? `<span class="pill">${escapeHtml(d.status)}</span>`
+                                      : ""
+                                  }
+                                  ${
+                                    d.round
+                                      ? `<span class="pill">R${escapeHtml(
+                                          String(d.round)
+                                        )}</span>`
+                                      : ""
+                                  }
+                                </div>
+                              </header>
+                              <p class="choice">${escapeHtml(d.decision || "—")}</p>
+                              ${
+                                d.reason
+                                  ? `<p class="reason">${escapeHtml(d.reason)}</p>`
+                                  : ""
+                              }
+                              ${
+                                impl.length
+                                  ? `<ul>${impl
+                                      .map((x) => `<li>${escapeHtml(x)}</li>`)
+                                      .join("")}</ul>`
+                                  : ""
+                              }
+                            </article>`;
+                          })
+                          .join("")
+                      : '<p class="empty">No decisions recorded.</p>'
+                  }
+                </div>
+              </section>
+
+              <div class="layout">
+                <section class="panel">
+                  <h2>Open questions</h2>
+                  ${
+                    openQuestions.length
+                      ? `<ul class="list-plain">${openQuestions
+                          .map((q) => `<li>${escapeHtml(q)}</li>`)
+                          .join("")}</ul>`
+                      : '<p class="empty">None — frontier is empty.</p>'
+                  }
+                </section>
+                <section class="panel">
+                  <h2>Next steps after confirm</h2>
+                  ${
+                    nextSteps.length
+                      ? `<ul class="list-plain">${nextSteps
+                          .map((s) => `<li>${escapeHtml(s)}</li>`)
+                          .join("")}</ul>`
+                      : '<p class="empty">No implementation steps listed yet.</p>'
+                  }
+                </section>
+              </div>
+            </div>
+          </div>
+
+          <p class="footer-note">Offline decision document generated by grill-me-html. Confirm in chat before the agent implements.</p>
+        `;
+
+        for (const m of mountIds) {
+          mountVisual(document.getElementById(m.id), m.item);
+        }
+      }
+
+      const injected = window.SUMMARY_CONFIG;
+      if (injected && typeof injected === "object") render(injected);
+      else render(DEMO);
+    })();
+  </script>
+</body>
+</html>

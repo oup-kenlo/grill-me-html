@@ -4,11 +4,15 @@ description: >
   Run a relentless design interview as adaptive HTML questionnaires.
   Map the plan as a design tree, ask only the current frontier each round,
   generate a browser questionnaire with soft branching, recommended answers,
+  preview-pane visual options (wireframes / architecture sketches),
   review, and one-click Submit that writes answers back for the next round.
+  When the frontier is empty, generate an offline shared-understanding.html
+  decision page and wait for confirmation before implementing.
   Use when the user says "grill me html", "html grill", "grill-me-html",
   "grill me in a questionnaire", "ask me in the browser",
   "HTML questionnaire interview", "adaptive grill",
   or wants design decisions collected like a form instead of chat/terminal Q&A.
+  Prefer type "preview" when options should be seen (UI layout, IA, architecture).
   Reach shared understanding first; do not implement until the user confirms.
 license: MIT
 ---
@@ -23,8 +27,9 @@ Do not run the interview as a long terminal question list.
 Default UX:
 
 1. User answers in the browser
-2. User clicks **Submit round**
-3. You automatically continue to the next round
+2. Visual decisions use `preview` questions (see the mock, then choose)
+3. User clicks **Submit round**
+4. You automatically continue to the next round
 
 No paste step by default.
 
@@ -32,10 +37,12 @@ No paste step by default.
 
 1. Build a design tree of decisions and dependencies.
 2. Each round, ask only the **frontier**.
-3. Render that frontier as HTML.
+3. Render that frontier as HTML — use real previews when the decision is visual
+   (UI wireframes or architecture diagrams as `type: "preview"`).
 4. Block on the local waiter until Submit writes answers.
 5. Read answers, recompute the tree, open the next round.
-6. Stop when the frontier is empty. Summarize. Wait for confirmation before acting.
+6. Stop when the frontier is empty. Build `shared-understanding.html`, open it,
+   and wait for confirmation before acting.
 
 ## Core model
 
@@ -145,15 +152,38 @@ Open facts: research in flight
 
 Write `.grill-me-html/config-XX.json`.
 
+Round config should include:
+
+- `title`, `subtitle`, `round`
+- `questions` (the frontier only)
+
 Each question needs:
 
 - `id`, `label`, `prompt`, optional `why`
-- `type`: `single` | `multi`
+- `type`: `single` | `multi` | `preview`
 - `recommended`: value(s) + reason
 - `options`: 2–5 concrete outcomes
 - optional `visibleWhen`
 
 Prefer **4–8** questions. One decision per question. Always recommend.
+
+
+### When to use `preview`
+
+Use `type: "preview"` when the user should **see** the options before choosing:
+
+- UI shell / layout / navigation patterns
+- information architecture wireframes
+- architecture or data-flow sketches (ASCII or HTML/SVG)
+- before/after or competing interaction models
+
+Rules:
+
+1. Every option must include non-empty `preview` text (description alone is not enough).
+2. Selection is single-choice; the right-hand pane shows the focused option.
+3. Prefer `previewFormat: "html"` for real offline wireframes/prototypes (self-contained HTML/CSS, no CDN, no JS).
+4. Prefer plain `preview` text for ASCII diagrams / trade-off cards.
+5. Keep abstract policy questions as `single` / `multi` — do not force preview chrome onto pure text decisions.
 
 Schema: `references/config-schema.md`.
 
@@ -186,7 +216,19 @@ Rules:
 
 - Unblock dependents, author next config, run next `run-round.mjs`
 - If user reverses an upstream decision, invalidate dependent branches
-- If frontier empty: shared-understanding summary → confirm → only then implement
+- If frontier empty:
+  1. Write `.grill-me-html/summary.json` from settled decisions
+  2. Build the decision page:
+
+```bash
+node "$SKILL_DIR/scripts/build-summary.mjs" \
+  --config .grill-me-html/summary.json \
+  --out .grill-me-html/shared-understanding.html \
+  --open
+```
+
+  3. Ask the user to confirm the shared understanding
+  4. Only then implement
 
 ## UI already enforced by the template
 
@@ -197,15 +239,20 @@ Rules:
   - file-only fallback: **Copy JSON**
 - Soft branching via `visibleWhen`
 - Strong selected state + toast on choice
+- `preview` questions: option list + live preview pane (hover/focus updates; click commits)
+- HTML previews render in sandboxed iframes (no scripts)
+- Final **shared-understanding** page for confirmation before implementation
 
 ## Files
 
 | Path | Role |
 |---|---|
 | `templates/questionnaire.html` | Offline questionnaire shell |
+| `templates/shared-understanding.html` | Final decision / confirmation page |
 | `scripts/run-round.mjs` | **Primary** one-shot: inject → serve → wait → answers |
 | `scripts/serve-and-collect.mjs` | Lower-level waiter used by run-round |
-| `references/config-schema.md` | Config + export schema |
+| `scripts/build-summary.mjs` | Build shared-understanding.html from summary.json |
+| `references/config-schema.md` | Config + export + summary schema |
 | `references/auto-continue.md` | Portable submit→continue contract |
 | `.grill-me-html/` | Runtime workdir in the target project |
 

@@ -78,8 +78,14 @@ if (window.QUESTIONNAIRE_CONFIG && typeof window.QUESTIONNAIRE_CONFIG === "objec
 }
 </script>`;
 
-  if (html.includes("</body>")) {
-    return html.replace("</body>", `${patch}\n</body>`);
+  // IMPORTANT: replace only the LAST </body>. The questionnaire template embeds
+  // "</body>" inside JS string literals (wrapPreviewHtml). A first-match replace
+  // would inject into the middle of the app script, leak source as page text,
+  // and break boot ("No visible questions" + raw JS on screen).
+  const closeIdx = html.lastIndexOf("</body>");
+  if (closeIdx !== -1) {
+    return html.slice(0, closeIdx) + `${patch}
+` + html.slice(closeIdx);
   }
   return html + patch;
 }

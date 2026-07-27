@@ -7,8 +7,10 @@ An agent skill that turns plan/design decisions into browser questionnaires:
 - Design tree, asked by **frontier** rounds
 - Soft branching inside a round (`visibleWhen`)
 - Recommended answers on every question
+- **`preview` questions** — option list + live preview pane (text sketches or offline HTML wireframes)
 - **Submit round** writes answers locally — no paste by default
 - Agent continues after submit via a foreground waiter
+- Final **shared-understanding.html** decision page before implementation
 
 ## Screenshots
 
@@ -20,9 +22,17 @@ An agent skill that turns plan/design decisions into browser questionnaires:
 
 ![Selected option](docs/media/option-selected.png)
 
+### Preview question (architecture diagrams)
+
+![Architecture options with live diagram preview](docs/media/architecture-preview.png)
+
 ### Review + submit
 
-![Review page](docs/media/review.png)
+![Review page with Submit round](docs/media/review.png)
+
+### Shared understanding
+
+![Final shared-understanding page](docs/media/shared-understanding.png)
 
 ## Install
 
@@ -85,10 +95,38 @@ Details:
         { "value": "power-users", "label": "Power users" },
         { "value": "everyone", "label": "Everyone" }
       ]
+    },
+    {
+      "id": "nav-pattern",
+      "label": "Navigation",
+      "prompt": "Which primary navigation pattern?",
+      "type": "preview",
+      "recommended": {
+        "value": "sidebar",
+        "reason": "Better for multi-section tools."
+      },
+      "options": [
+        {
+          "value": "sidebar",
+          "label": "Left sidebar",
+          "description": "Persistent section list + content.",
+          "previewFormat": "html",
+          "preview": "<div style=\"font:14px system-ui;border:1px solid #e5e5e5;border-radius:8px;display:grid;grid-template-columns:100px 1fr;height:120px\"><aside style=\"background:#f5f5f5;padding:8px\"><strong>App</strong></aside><main style=\"padding:8px\">Content</main></div>"
+        },
+        {
+          "value": "topnav",
+          "label": "Top navigation",
+          "description": "Horizontal links in the header.",
+          "previewFormat": "html",
+          "preview": "<div style=\"font:14px system-ui;border:1px solid #e5e5e5;border-radius:8px;height:120px\"><header style=\"padding:8px;border-bottom:1px solid #e5e5e5\"><strong>App</strong> · Home · Docs</header><main style=\"padding:8px\">Content</main></div>"
+        }
+      ]
     }
   ]
 }
 ```
+
+Use `type: "preview"` when the user should **see** the options (UI layout, IA, architecture). Every option needs non-empty `preview` text; `previewFormat` can be `text`, `html`, or `auto`.
 
 ## Layout
 
@@ -96,17 +134,37 @@ Details:
 grill-me-html/
 ├── README.md
 ├── LICENSE
-├── docs/media/
+├── docs/media/          # screenshots (preview + summary)
 └── skills/grill-me-html/
     ├── SKILL.md
     ├── scripts/
     │   ├── run-round.mjs
-    │   └── serve-and-collect.mjs
+    │   ├── serve-and-collect.mjs
+    │   └── build-summary.mjs
     ├── templates/
-    │   └── questionnaire.html
+    │   ├── questionnaire.html
+    │   └── shared-understanding.html
     └── references/
         ├── auto-continue.md
         └── config-schema.md
+```
+
+## Local preview (no agent wait)
+
+Open the built-in demos in a browser:
+
+```bash
+open skills/grill-me-html/templates/questionnaire.html
+open skills/grill-me-html/templates/shared-understanding.html
+```
+
+Or generate a summary page from JSON:
+
+```bash
+node skills/grill-me-html/scripts/build-summary.mjs \
+  --config path/to/summary.json \
+  --out .grill-me-html/shared-understanding.html \
+  --open
 ```
 
 ## License
