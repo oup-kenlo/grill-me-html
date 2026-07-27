@@ -1,0 +1,8 @@
+.DS_Store
+node_modules/
+.grill-me-html/
+.tmp/
+.pi/
+*.log
+.idea/
+.vscode/

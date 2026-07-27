@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Grill Me HTML</title>
+  <style>
+    :root {
+      --bg: #fafafa;
+      --card: #ffffff;
+      --muted: #f5f5f5;
+      --ink: #0a0a0a;
+      --ink-muted: #737373;
+      --ink-subtle: #a3a3a3;
+      --line: #e5e5e5;
+      --line-hover: #d4d4d4;
+      --accent: #0a0a0a;
+      --accent-fg: #ffffff;
+      --success: #16a34a;
+      --warning: #b45309;
+      --error: #dc2626;
+      --error-bg: #fef2f2;
+      --error-line: #fecaca;
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-full: 9999px;
+      --space-2xs: 2px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --space-2xl: 48px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Noto Sans SC", "Helvetica Neue", Arial, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      --ease: ease;
+      --dur: 150ms;
+      --content: 1080px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--ink);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    button, textarea, input { font: inherit; color: inherit; }
+    button {
+      cursor: pointer;
+      border: 0;
+      background: none;
+      padding: 0;
+    }
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
+    }
+
+    .app {
+      max-width: var(--content);
+      margin: 0 auto;
+      padding: var(--space-xl) var(--space-md) var(--space-2xl);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-lg);
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-lg);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      min-width: 0;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    .kicker-mark {
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      background: var(--ink);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 3vw, 36px);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      margin: 0;
+      max-width: 58ch;
+      color: var(--ink-muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      justify-content: flex-end;
+    }
+
+    .meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 32px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-full);
+      background: var(--card);
+      color: var(--ink-muted);
+      font-size: 13px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .meta strong {
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: var(--space-lg);
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: var(--space-md);
+      padding: var(--space-md);
+    }
+
+    .sidebar-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+    }
+
+    .sidebar-head h2 {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    .sidebar-count {
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      color: var(--ink-subtle);
+    }
+
+    .progress-track {
+      height: 2px;
+      background: var(--muted);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      margin-bottom: var(--space-md);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--ink);
+      transition: width var(--dur) var(--ease);
+    }
+
+    .nav-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 2px;
+      max-height: calc(100vh - 220px);
+      overflow: auto;
+    }
+
+    .nav-item {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 36px minmax(0, 1fr) 12px;
+      gap: var(--space-sm);
+      align-items: center;
+      text-align: left;
+      padding: 10px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      color: var(--ink);
+      transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+    }
+
+    .nav-item:hover:not(:disabled) {
+      background: var(--muted);
+      border-color: var(--line);
+    }
+
+    .nav-item.active {
+      background: var(--muted);
+      border-color: var(--line-hover);
+    }
+
+    .nav-item.hidden-q {
+      opacity: 0.38;
+    }
+
+    .nav-index {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--ink-subtle);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .nav-item.answered .nav-index {
+      color: var(--ink);
+    }
+
+    .nav-label {
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.35;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .nav-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      background: transparent;
+      justify-self: end;
+    }
+
+    .nav-item.answered .nav-dot {
+      background: var(--ink);
+    }
+
+    .main {
+      min-height: 620px;
+      padding: var(--space-xl);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: var(--space-lg);
+    }
+
+    .question-head {
+      display: grid;
+      gap: var(--space-sm);
+    }
+
+    .question-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      align-items: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-full);
+      background: var(--bg);
+      color: var(--ink-muted);
+      font-size: 12px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pill.emphasis {
+      color: var(--ink);
+      border-color: var(--line-hover);
+      background: var(--muted);
+    }
+
+    .prompt {
+      margin: 0;
+      font-size: clamp(22px, 2.2vw, 28px);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.25;
+    }
+
+    .why {
+      margin: 0;
+      color: var(--ink-muted);
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 62ch;
+    }
+
+    .why strong {
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    .options {
+      display: grid;
+      gap: var(--space-sm);
+      align-content: start;
+    }
+
+    .option {
+      position: relative;
+      width: 100%;
+      text-align: left;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--card);
+      padding: 14px 14px 14px 44px;
+      transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+    }
+
+    .option:hover {
+      border-color: var(--line-hover);
+      background: var(--bg);
+    }
+
+    .option.selected {
+      border-color: var(--ink);
+      border-width: 2px;
+      background: var(--muted);
+      padding: 13px 13px 13px 43px; /* keep size stable with 2px border */
+      box-shadow: inset 3px 0 0 var(--ink);
+    }
+
+    .option.recommended:not(.selected) {
+      border-style: dashed;
+    }
+
+    .option .mark {
+      position: absolute;
+      left: 14px;
+      top: 16px;
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid var(--ink-subtle);
+      background: var(--card);
+      display: grid;
+      place-items: center;
+    }
+
+    .option.single .mark { border-radius: var(--radius-full); }
+    .option.multi .mark { border-radius: 3px; }
+
+    .option.selected .mark {
+      border-color: var(--ink);
+      background: var(--ink);
+    }
+
+    .option.single.selected .mark::after {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      background: var(--accent-fg);
+    }
+
+    .option.multi.selected .mark::after {
+      content: "";
+      width: 8px;
+      height: 4px;
+      border-left: 1.5px solid var(--accent-fg);
+      border-bottom: 1.5px solid var(--accent-fg);
+      transform: rotate(-45deg) translate(0.5px, -0.5px);
+    }
+
+    .option-title {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      align-items: center;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.35;
+      margin-bottom: 2px;
+    }
+
+    .option-desc {
+      color: var(--ink-muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .rec-tag {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--ink);
+      background: var(--muted);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-full);
+      padding: 2px 8px;
+    }
+
+    .fields {
+      display: grid;
+      gap: var(--space-md);
+    }
+
+    .field {
+      display: grid;
+      gap: var(--space-xs);
+    }
+
+    .field label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-muted);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 88px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      background: var(--card);
+      color: var(--ink);
+      line-height: 1.55;
+      transition: border-color var(--dur) var(--ease);
+    }
+
+    textarea::placeholder { color: var(--ink-subtle); }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--ink);
+    }
+
+    .footer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      justify-content: space-between;
+      align-items: center;
+      padding-top: var(--space-md);
+      border-top: 1px solid var(--line);
+    }
+
+    .footer-left,
+    .footer-right {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--card);
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 500;
+      transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--muted);
+      border-color: var(--line-hover);
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--accent-fg);
+    }
+
+    .btn.primary:hover:not(:disabled) {
+      background: #262626;
+      border-color: #262626;
+    }
+
+    .btn.ghost {
+      background: transparent;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--ink-subtle);
+    }
+
+    .error {
+      color: var(--error);
+      background: var(--error-bg);
+      border: 1px solid var(--error-line);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .review {
+      display: grid;
+      gap: var(--space-sm);
+    }
+
+    .review-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      background: var(--card);
+      display: grid;
+      gap: 6px;
+    }
+
+    .review-card h3 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .review-card p {
+      margin: 0;
+      color: var(--ink-muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .review-card .answer {
+      color: var(--ink);
+      white-space: pre-wrap;
+    }
+
+    .review-card .answer.open {
+      color: var(--warning);
+    }
+
+    .review-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      margin-top: 4px;
+    }
+
+    .export-block {
+      display: grid;
+      gap: var(--space-sm);
+    }
+
+    .json-preview {
+      margin: 0;
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: var(--ink);
+      color: #fafafa;
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      max-height: 280px;
+      overflow: auto;
+    }
+
+    .toast {
+      position: fixed;
+      right: var(--space-md);
+      bottom: var(--space-md);
+      background: var(--ink);
+      color: var(--accent-fg);
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(6px);
+      pointer-events: none;
+      transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+      z-index: 30;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .empty-state {
+      display: grid;
+      gap: var(--space-sm);
+      place-items: start;
+      color: var(--ink-muted);
+      padding: var(--space-xl) 0;
+    }
+
+    .empty-state strong {
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    @media (max-width: 860px) {
+      .app { padding: var(--space-md) var(--space-sm) var(--space-2xl); }
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .nav-list {
+        max-height: none;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(148px, 1fr);
+        overflow-x: auto;
+      }
+      .nav-item {
+        grid-template-columns: 28px minmax(0, 1fr);
+      }
+      .nav-dot { display: none; }
+      .topbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .meta-row { justify-content: flex-start; }
+      .main {
+        min-height: 0;
+        padding: var(--space-md);
+      }
+      .footer {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .footer-left,
+      .footer-right {
+        width: 100%;
+      }
+      .footer-right { justify-content: space-between; }
+      .hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="kicker">
+          <span class="kicker-mark" aria-hidden="true"></span>
+          Grill Me HTML
+        </div>
+        <h1 id="title">Loading questionnaire…</h1>
+        <p class="subtitle" id="subtitle"></p>
+      </div>
+      <div class="meta-row">
+        <div class="meta" id="roundBadge">Round <strong>—</strong></div>
+        <div class="meta" id="progressBadge"><strong>0</strong> / 0 answered</div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="panel sidebar" aria-label="Round questions">
+        <div class="sidebar-head">
+          <h2>This round</h2>
+          <div class="sidebar-count" id="sidebarCount">0 visible</div>
+        </div>
+        <div class="progress-track" aria-hidden="true">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <ul class="nav-list" id="navList"></ul>
+      </aside>
+
+      <main class="panel main" id="main">
+        <div class="empty-state">
+          <strong>Reading questionnaire config…</strong>
+          <span>If this stays empty, the config was not injected into the template.</span>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // Agent: replace the null below with a full QuestionnaireConfig JSON object.
+    // Keep it valid JSON. Escape any </ sequences as \u003c/ inside string values if needed.
+    window.QUESTIONNAIRE_CONFIG = /*__CONFIG__*/ null;
+  </script>
+
+  <script>
+    (function () {
+      const DEMO_CONFIG = {
+        skill: "grill-me-html",
+        round: 1,
+        title: "Demo: Blog comments · Round 1",
+        subtitle: "Settle upstream product boundaries. This is the template demo; real runs inject a live config.",
+        theme: "plain",
+        locale: "en",
+        questions: [
+          {
+            id: "who-can-comment",
+            label: "Who can post",
+            prompt: "Who can publish a comment?",
+            why: "Sets identity, spam cost, and notification shape.",
+            type: "single",
+            recommended: {
+              value: "logged-in",
+              reason: "Lower spam cost; guests stay read-only for v1."
+            },
+            options: [
+              {
+                value: "logged-in",
+                label: "Logged-in users only",
+                description: "Guests can read. Simpler to ship."
+              },
+              {
+                value: "anyone",
+                label: "Anyone",
+                description: "Includes guests; needs stronger anti-spam."
+              }
+            ]
+          },
+          {
+            id: "guest-rate-limit",
+            label: "Guest limits",
+            prompt: "If guests can comment, what is the v1 rate-limit strategy?",
+            why: "Only relevant when anyone can comment.",
+            type: "single",
+            visibleWhen: {
+              questionId: "who-can-comment",
+              values: ["anyone"]
+            },
+            recommended: {
+              value: "email-captcha",
+              reason: "Cheap and blocks most bots."
+            },
+            options: [
+              { value: "email-captcha", label: "Email verify + captcha" },
+              { value: "captcha-only", label: "Captcha only" },
+              { value: "manual-review", label: "Review before publish" }
+            ]
+          },
+          {
+            id: "nesting",
+            label: "Nesting",
+            prompt: "Should comments support nested replies?",
+            why: "Affects data model and UI complexity.",
+            type: "single",
+            recommended: {
+              value: "one-level",
+              reason: "One reply level is usually enough and stays cheap."
+            },
+            options: [
+              { value: "flat", label: "Flat", description: "A single list only." },
+              {
+                value: "one-level",
+                label: "One-level replies",
+                description: "Reply to a comment, no deep threads."
+              },
+              {
+                value: "infinite",
+                label: "Infinite nesting",
+                description: "Full thread trees."
+              }
+            ]
+          },
+          {
+            id: "moderation",
+            label: "Moderation",
+            prompt: "What is the v1 moderation strategy?",
+            type: "single",
+            recommended: {
+              value: "post-then-review",
+              reason: "Keep discussion fluid; keyword filter + manual delete as backstop."
+            },
+            options: [
+              { value: "post-then-review", label: "Post then review" },
+              { value: "review-then-post", label: "Review then post" },
+              { value: "none", label: "No moderation yet" }
+            ]
+          }
+        ]
+      };
+
+      const state = {
+        config: null,
+        index: 0,
+        mode: "question", // question | review | done
+        answers: {},
+        toastTimer: null,
+        submitting: false,
+        submitResult: null
+      };
+
+      const el = {
+        title: document.getElementById("title"),
+        subtitle: document.getElementById("subtitle"),
+        roundBadge: document.getElementById("roundBadge"),
+        progressBadge: document.getElementById("progressBadge"),
+        progressFill: document.getElementById("progressFill"),
+        sidebarCount: document.getElementById("sidebarCount"),
+        navList: document.getElementById("navList"),
+        main: document.getElementById("main"),
+        toast: document.getElementById("toast")
+      };
+
+      function toast(msg) {
+        el.toast.textContent = msg;
+        el.toast.classList.add("show");
+        clearTimeout(state.toastTimer);
+        state.toastTimer = setTimeout(() => el.toast.classList.remove("show"), 1800);
+      }
+
+      function clone(obj) {
+        return JSON.parse(JSON.stringify(obj));
+      }
+
+      function getAnswer(id) {
+        return state.answers[id] || { values: [], customText: "", note: "" };
+      }
+
+      function setAnswer(id, patch) {
+        const prev = getAnswer(id);
+        state.answers[id] = {
+          values: patch.values !== undefined ? patch.values.slice() : prev.values.slice(),
+          customText:
+            patch.customText !== undefined ? patch.customText : prev.customText || "",
+          note: patch.note !== undefined ? patch.note : prev.note || ""
+        };
+      }
+
+      function evalCondition(cond) {
+        if (!cond) return true;
+        if (cond.all) return cond.all.every(evalCondition);
+        if (cond.any) return cond.any.some(evalCondition);
+        if (cond.not) return !evalCondition(cond.not);
+        if (!cond.questionId) return true;
+        const ans = getAnswer(cond.questionId);
+        const selected = new Set(ans.values || []);
+        const wanted = cond.values || [];
+        const match = cond.match || "any";
+        if (match === "all") return wanted.every((v) => selected.has(v));
+        return wanted.some((v) => selected.has(v));
+      }
+
+      function isQuestionVisible(q) {
+        return evalCondition(q.visibleWhen);
+      }
+
+      function visibleQuestions() {
+        return (state.config.questions || []).filter(isQuestionVisible);
+      }
+
+      function visibleOptions(q) {
+        return (q.options || []).filter((opt) => evalCondition(opt.visibleWhen));
+      }
+
+      function recommendedValues(q) {
+        if (!q.recommended) return [];
+        if (Array.isArray(q.recommended.values) && q.recommended.values.length) {
+          return q.recommended.values;
+        }
+        if (q.recommended.value) return [q.recommended.value];
+        return [];
+      }
+
+      function isAnswered(q) {
+        if (!isQuestionVisible(q)) return false;
+        const ans = getAnswer(q.id);
+        if ((ans.customText || "").trim()) return true;
+        return (ans.values || []).length > 0;
+      }
+
+      function optionLabel(q, value) {
+        const opt = (q.options || []).find((o) => o.value === value);
+        return opt ? opt.label : value;
+      }
+
+      function progress() {
+        const qs = visibleQuestions();
+        const done = qs.filter(isAnswered).length;
+        return { total: qs.length, done };
+      }
+
+      function ensureIndexInRange() {
+        const qs = visibleQuestions();
+        if (!qs.length) {
+          state.index = 0;
+          return;
+        }
+        if (state.index >= qs.length) state.index = qs.length - 1;
+        if (state.index < 0) state.index = 0;
+      }
+
+      function currentQuestion() {
+        const qs = visibleQuestions();
+        return qs[state.index] || null;
+      }
+
+      function pruneInvisibleAnswers() {
+        for (const q of state.config.questions || []) {
+          const ans = getAnswer(q.id);
+          if (!ans.values.length) continue;
+          const allowed = new Set(visibleOptions(q).map((o) => o.value));
+          const next = ans.values.filter((v) => allowed.has(v));
+          if (next.length !== ans.values.length) {
+            setAnswer(q.id, { values: next });
+          }
+        }
+      }
+
+      function applyRecommended(q) {
+        const vals = recommendedValues(q).filter((v) =>
+          visibleOptions(q).some((o) => o.value === v)
+        );
+        if (!vals.length) {
+          toast("No usable recommendation for this question");
+          return;
+        }
+        setAnswer(q.id, {
+          values: q.type === "multi" ? vals : [vals[0]],
+          customText: ""
+        });
+        render();
+      }
+
+      function toggleOption(q, value) {
+        const ans = getAnswer(q.id);
+        if (q.type === "multi") {
+          const set = new Set(ans.values);
+          if (set.has(value)) set.delete(value);
+          else set.add(value);
+          setAnswer(q.id, {
+            values: Array.from(set),
+            customText: ans.customText || ""
+          });
+          pruneInvisibleAnswers();
+          render();
+          return;
+        }
+
+        // Single-select: select, show feedback, then advance when possible.
+        setAnswer(q.id, { values: [value], customText: "" });
+        pruneInvisibleAnswers();
+        const label = optionLabel(q, value);
+        toast(`Selected: ${label}`);
+
+        const qsBefore = visibleQuestions();
+        const idxBefore = qsBefore.findIndex((item) => item.id === q.id);
+        render();
+
+        // Soft-branching may change the list; re-find current question and advance.
+        const qs = visibleQuestions();
+        const idx = qs.findIndex((item) => item.id === q.id);
+        if (idx >= 0 && idx < qs.length - 1 && state.mode === "question") {
+          window.setTimeout(() => {
+            // Only auto-advance if user hasn't navigated away.
+            const still = currentQuestion();
+            if (still && still.id === q.id && state.mode === "question") {
+              state.index = idx + 1;
+              render();
+            }
+          }, 220);
+        } else if (idx === qs.length - 1 || idxBefore === qsBefore.length - 1) {
+          // Last visible question: stay put with strong selected state.
+        }
+      }
+
+      function buildExport() {
+        const all = state.config.questions || [];
+        const visible = visibleQuestions();
+        const visibleIds = new Set(visible.map((q) => q.id));
+        const answers = {};
+        const skipped = [];
+
+        for (const q of all) {
+          if (!visibleIds.has(q.id)) {
+            skipped.push(q.id);
+            continue;
+          }
+          const ans = getAnswer(q.id);
+          const values = ans.values || [];
+          const customText = (ans.customText || "").trim();
+          const note = (ans.note || "").trim();
+          if (!values.length && !customText) {
+            skipped.push(q.id);
+            continue;
+          }
+          answers[q.id] = {
+            values: values.slice(),
+            labels: values.map((v) => optionLabel(q, v)),
+            customText: customText || null,
+            note: note || null
+          };
+        }
+
+        return {
+          skill: "grill-me-html",
+          round: state.config.round,
+          title: state.config.title,
+          answers,
+          skipped,
+          meta: {
+            completedAt: new Date().toISOString(),
+            visibleQuestionIds: visible.map((q) => q.id)
+          }
+        };
+      }
+
+      function handoff() {
+        // Prefer live global so serve-and-collect can patch after this script boots.
+        const live = window.GRILL_ME_HTML_HANDOFF;
+        if (live && typeof live === "object") return live;
+        return (state.config && state.config.handoff) || {};
+      }
+
+      function hasServerHandoff() {
+        return Boolean(handoff().submitUrl);
+      }
+
+      async function copyJson() {
+        const payload = buildExport();
+        const text = JSON.stringify(payload, null, 2);
+        try {
+          await navigator.clipboard.writeText(text);
+          toast(
+            hasServerHandoff()
+              ? "JSON copied (fallback)"
+              : "JSON copied — paste it back into the chat"
+          );
+        } catch (err) {
+          state.mode = "review";
+          render();
+          toast("Clipboard blocked — copy manually from the review page");
+        }
+      }
+
+      function clearServerHandoff() {
+        try {
+          delete window.GRILL_ME_HTML_HANDOFF;
+        } catch (_) {
+          window.GRILL_ME_HTML_HANDOFF = null;
+        }
+        if (state.config && state.config.handoff) {
+          delete state.config.handoff.submitUrl;
+          state.config.handoff.mode = "clipboard";
+        }
+      }
+
+      async function probeCollector(submitUrl) {
+        try {
+          const healthUrl = String(submitUrl).replace(/\/submit\/?$/, "/health");
+          const res = await fetch(healthUrl, { method: "GET", cache: "no-store" });
+          if (!res.ok) return false;
+          const data = await res.json().catch(() => ({}));
+          return data && data.ok === true && data.submitted !== true;
+        } catch (_) {
+          return false;
+        }
+      }
+
+      async function submitRound() {
+        if (state.submitting) return;
+        const payload = buildExport();
+        const h = handoff();
+
+        if (h.submitUrl) {
+          state.submitting = true;
+          state.submitResult = null;
+          render();
+          try {
+            const alive = await probeCollector(h.submitUrl);
+            if (!alive) {
+              throw new Error(
+                "Collector offline or already finished. Use Copy JSON instead."
+              );
+            }
+
+            const res = await fetch(h.submitUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || data.ok === false) {
+              throw new Error(data.message || data.error || `HTTP ${res.status}`);
+            }
+            state.submitResult = {
+              ok: true,
+              message:
+                data.message ||
+                "Answers sent. You can close this tab — the agent will continue."
+            };
+            state.mode = "done";
+            toast("Submitted to agent");
+          } catch (err) {
+            const msg = String(err && err.message ? err.message : err);
+            // Network / offline collector: demote to clipboard fallback so UI stops offering dead Submit.
+            clearServerHandoff();
+            state.submitResult = {
+              ok: false,
+              message:
+                msg.includes("Failed to fetch") || msg.includes("NetworkError")
+                  ? "Collector is not running (page was probably left open after the server exited). Use Copy JSON and paste into chat."
+                  : msg
+            };
+            try {
+              await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+              toast("Collector offline — JSON copied as fallback");
+              state.submitResult.message +=
+                " JSON was also copied to your clipboard.";
+            } catch (_) {
+              toast("Collector offline — copy JSON manually");
+            }
+          } finally {
+            state.submitting = false;
+            render();
+          }
+          return;
+        }
+
+        // Fallback when opened as a plain file with no local collector.
+        await copyJson();
+      }
+
+      function renderNav() {
+        const all = state.config.questions || [];
+        const visible = visibleQuestions();
+        const visibleIds = new Set(visible.map((q) => q.id));
+        const current = currentQuestion();
+
+        el.navList.innerHTML = "";
+        all.forEach((q) => {
+          const li = document.createElement("li");
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "nav-item";
+          const vis = visibleIds.has(q.id);
+          if (!vis) btn.classList.add("hidden-q");
+          if (vis && current && current.id === q.id && state.mode === "question") {
+            btn.classList.add("active");
+          }
+          if (vis && isAnswered(q)) btn.classList.add("answered");
+
+          const idx = document.createElement("div");
+          idx.className = "nav-index";
+          idx.textContent = vis
+            ? `Q${visible.findIndex((x) => x.id === q.id) + 1}`
+            : "—";
+
+          const label = document.createElement("div");
+          label.className = "nav-label";
+          label.textContent = q.label || q.prompt;
+
+          const dot = document.createElement("span");
+          dot.className = "nav-dot";
+          dot.setAttribute("aria-hidden", "true");
+
+          btn.appendChild(idx);
+          btn.appendChild(label);
+          btn.appendChild(dot);
+          btn.disabled = !vis;
+          btn.addEventListener("click", () => {
+            state.mode = "question";
+            state.index = visible.findIndex((x) => x.id === q.id);
+            render();
+          });
+          li.appendChild(btn);
+          el.navList.appendChild(li);
+        });
+
+        const { total, done } = progress();
+        el.progressBadge.innerHTML = `<strong>${done}</strong> / ${total} answered`;
+        el.sidebarCount.textContent = `${total} visible`;
+        el.progressFill.style.width = total
+          ? `${Math.round((done / total) * 100)}%`
+          : "0%";
+      }
+
+      function renderQuestion() {
+        const q = currentQuestion();
+        const qs = visibleQuestions();
+        if (!q) {
+          el.main.innerHTML = `
+            <div class="empty-state">
+              <strong>No visible questions</strong>
+              <span>Soft branching may have hidden everything, or config.questions is empty.</span>
+              <div class="review-actions">
+                <button class="btn primary" id="toReviewEmpty">Review answers</button>
+              </div>
+            </div>`;
+          document.getElementById("toReviewEmpty").onclick = () => {
+            state.mode = "review";
+            render();
+          };
+          return;
+        }
+
+        const ans = getAnswer(q.id);
+        const recVals = new Set(recommendedValues(q));
+        const opts = visibleOptions(q);
+
+        const recReason =
+          q.recommended && q.recommended.reason
+            ? `<p class="why"><strong>Recommended because</strong> ${escapeHtml(
+                q.recommended.reason
+              )}</p>`
+            : "";
+        const why = q.why ? `<p class="why">${escapeHtml(q.why)}</p>` : "";
+
+        const optionsHtml = opts
+          .map((opt) => {
+            const selected = ans.values.includes(opt.value);
+            const isRec = recVals.has(opt.value);
+            return `
+              <button type="button"
+                class="option ${q.type} ${selected ? "selected" : ""} ${
+              isRec ? "recommended" : ""
+            }"
+                data-value="${escapeAttr(opt.value)}"
+                aria-pressed="${selected ? "true" : "false"}">
+                <span class="mark" aria-hidden="true"></span>
+                <div class="option-title">
+                  <span>${escapeHtml(opt.label)}</span>
+                  ${isRec ? '<span class="rec-tag">Recommended</span>' : ""}
+                </div>
+                ${
+                  opt.description
+                    ? `<div class="option-desc">${escapeHtml(opt.description)}</div>`
+                    : ""
+                }
+              </button>
+            `;
+          })
+          .join("");
+
+        el.main.innerHTML = `
+          <div class="question-head">
+            <div class="question-meta">
+              <span class="pill emphasis">Q${state.index + 1} / ${qs.length}</span>
+              <span class="pill">${
+                q.type === "multi" ? "Multi-select" : "Single-select"
+              }</span>
+              ${recVals.size ? '<span class="pill">Has recommendation</span>' : ""}
+            </div>
+            <h2 class="prompt">${escapeHtml(q.prompt)}</h2>
+            ${why}
+            ${recReason}
+          </div>
+          <div class="options" id="options">${optionsHtml}</div>
+          <div class="fields">
+            <div class="field">
+              <label for="customText">Write your own (optional)</label>
+              <textarea id="customText" placeholder="If none of the options fit, write the decision yourself…">${escapeHtml(
+                ans.customText || ""
+              )}</textarea>
+            </div>
+            <div class="field">
+              <label for="noteText">Note for the agent (optional)</label>
+              <textarea id="noteText" placeholder="Extra context, constraints, or trade-offs…">${escapeHtml(
+                ans.note || ""
+              )}</textarea>
+            </div>
+          </div>
+          <div class="footer">
+            <div class="footer-left">
+              <button class="btn" id="btnPrev" ${
+                state.index === 0 ? "disabled" : ""
+              }>Previous</button>
+              <button class="btn ghost" id="btnRec">Use recommendation</button>
+            </div>
+            <div class="footer-right">
+              <span class="hint">${
+                q.type === "multi" ? "Pick one or more" : "Pick one"
+              }</span>
+              ${
+                state.index >= qs.length - 1
+                  ? ""
+                  : '<button class="btn" id="btnReview">Review</button>'
+              }
+              <button class="btn primary" id="btnNext">${
+                state.index >= qs.length - 1 ? "Review answers" : "Next"
+              }</button>
+            </div>
+          </div>
+        `;
+
+        el.main.querySelectorAll(".option").forEach((node) => {
+          node.addEventListener("click", () =>
+            toggleOption(q, node.getAttribute("data-value"))
+          );
+        });
+
+        const custom = document.getElementById("customText");
+        const note = document.getElementById("noteText");
+        custom.addEventListener("input", () => {
+          const text = custom.value;
+          if (q.type === "single" && text.trim()) {
+            setAnswer(q.id, {
+              values: [],
+              customText: text,
+              note: note.value
+            });
+          } else {
+            setAnswer(q.id, {
+              customText: text,
+              note: note.value
+            });
+          }
+          renderNav();
+        });
+        note.addEventListener("input", () => {
+          setAnswer(q.id, {
+            note: note.value,
+            customText: custom.value
+          });
+        });
+
+        document.getElementById("btnPrev").onclick = () => {
+          state.index = Math.max(0, state.index - 1);
+          render();
+        };
+        document.getElementById("btnNext").onclick = () => {
+          if (state.index >= qs.length - 1) state.mode = "review";
+          else state.index += 1;
+          render();
+        };
+        const reviewBtn = document.getElementById("btnReview");
+        if (reviewBtn) {
+          reviewBtn.onclick = () => {
+            state.mode = "review";
+            render();
+          };
+        }
+        document.getElementById("btnRec").onclick = () => applyRecommended(q);
+      }
+
+      function renderReview() {
+        const visible = visibleQuestions();
+        const payload = buildExport();
+        const server = hasServerHandoff();
+        const cards = visible
+          .map((q, i) => {
+            const ans = getAnswer(q.id);
+            const answered = isAnswered(q);
+            let body = "Unanswered";
+            if (answered) {
+              const parts = [];
+              if (ans.values.length) {
+                parts.push(ans.values.map((v) => optionLabel(q, v)).join(", "));
+              }
+              if ((ans.customText || "").trim()) {
+                parts.push(`Custom: ${ans.customText.trim()}`);
+              }
+              if ((ans.note || "").trim()) {
+                parts.push(`Note: ${ans.note.trim()}`);
+              }
+              body = parts.join("\n");
+            }
+            return `
+              <div class="review-card">
+                <h3>Q${i + 1}. ${escapeHtml(q.label || q.prompt)}</h3>
+                <p>${escapeHtml(q.prompt)}</p>
+                <p class="answer ${answered ? "" : "open"}">${escapeHtml(body)}</p>
+                <div class="review-actions">
+                  <button class="btn" data-jump="${q.id}">Edit</button>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+
+        const unanswered = visible.filter((q) => !isAnswered(q)).length;
+        const submitLabel = state.submitting
+          ? "Submitting…"
+          : server
+            ? "Submit round"
+            : "Copy JSON";
+        const help = server
+          ? "Click Submit round. Answers go straight to the agent — no paste needed. Keep this tab from a live local server, not an old dead tab."
+          : "No live collector detected. Copy JSON and paste it back into chat.";
+
+        el.main.innerHTML = `
+          <div class="question-head">
+            <div class="question-meta">
+              <span class="pill emphasis">Review</span>
+              <span class="pill">${visible.length - unanswered} answered · ${unanswered} open</span>
+              ${server ? '<span class="pill">Auto handoff</span>' : ""}
+            </div>
+            <h2 class="prompt">Check this round, then submit</h2>
+            <p class="why">${escapeHtml(help)}</p>
+            ${
+              unanswered
+                ? `<div class="error">${unanswered} visible question(s) still open. You can submit anyway; they will be marked skipped.</div>`
+                : ""
+            }
+            ${
+              state.submitResult && !state.submitResult.ok
+                ? `<div class="error">Submit failed: ${escapeHtml(
+                    state.submitResult.message
+                  )}</div>`
+                : ""
+            }
+          </div>
+          <div class="review">${
+            cards || '<div class="empty-state"><strong>No visible questions</strong></div>'
+          }</div>
+          <div class="export-block">
+            <div class="question-meta">
+              <span class="pill">Payload preview</span>
+            </div>
+            <pre class="json-preview" id="jsonPreview">${escapeHtml(
+              JSON.stringify(payload, null, 2)
+            )}</pre>
+          </div>
+          <div class="footer">
+            <div class="footer-left">
+              <button class="btn" id="backToQ">Back to questions</button>
+            </div>
+            <div class="footer-right">
+              <button class="btn" id="copyJson">Copy JSON</button>
+              <button class="btn primary" id="submitRound" ${
+                state.submitting ? "disabled" : ""
+              }>${submitLabel}</button>
+            </div>
+          </div>
+        `;
+
+        el.main.querySelectorAll("[data-jump]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const id = btn.getAttribute("data-jump");
+            state.mode = "question";
+            state.index = visible.findIndex((q) => q.id === id);
+            render();
+          });
+        });
+        document.getElementById("backToQ").onclick = () => {
+          state.mode = "question";
+          render();
+        };
+        document.getElementById("copyJson").onclick = copyJson;
+        document.getElementById("submitRound").onclick = submitRound;
+      }
+
+      function renderDone() {
+        const result = state.submitResult || {
+          ok: true,
+          message: "Answers sent. You can close this tab."
+        };
+        el.main.innerHTML = `
+          <div class="empty-state">
+            <strong>${result.ok ? "Round submitted" : "Submit issue"}</strong>
+            <span>${escapeHtml(result.message)}</span>
+            <div class="review-actions">
+              <button class="btn" id="backToReview">Back to review</button>
+              <button class="btn primary" id="copyJsonDone">Copy JSON</button>
+            </div>
+          </div>
+        `;
+        document.getElementById("backToReview").onclick = () => {
+          state.mode = "review";
+          render();
+        };
+        document.getElementById("copyJsonDone").onclick = copyJson;
+      }
+
+      function escapeHtml(str) {
+        return String(str ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function escapeAttr(str) {
+        return escapeHtml(str).replace(/'/g, "&#39;");
+      }
+
+      function render() {
+        pruneInvisibleAnswers();
+        ensureIndexInRange();
+        el.title.textContent = state.config.title || "Grill Me HTML";
+        el.subtitle.textContent = state.config.subtitle || "";
+        el.roundBadge.innerHTML = `Round <strong>${
+          state.config.round ?? "—"
+        }</strong>`;
+        document.title = state.config.title || "Grill Me HTML";
+        renderNav();
+        if (state.mode === "done") renderDone();
+        else if (state.mode === "review") renderReview();
+        else renderQuestion();
+      }
+
+      function boot() {
+        const injected = window.QUESTIONNAIRE_CONFIG;
+        if (
+          injected &&
+          typeof injected === "object" &&
+          Array.isArray(injected.questions)
+        ) {
+          state.config = clone(injected);
+        } else {
+          state.config = clone(DEMO_CONFIG);
+        }
+
+        // Allow a late handoff patch injected after this script (serve-and-collect).
+        // Re-read on first paint after a microtask so external patch can attach.
+        for (const q of state.config.questions || []) {
+          if (!state.answers[q.id]) {
+            state.answers[q.id] = { values: [], customText: "", note: "" };
+          }
+        }
+
+        render();
+      }
+
+      boot();
+    })();
+  </script>
+</body>
+</html>
