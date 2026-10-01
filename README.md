@@ -10,7 +10,9 @@ An agent skill that turns plan/design decisions into browser questionnaires:
 - **`preview` questions** — option list + live preview pane (text sketches or offline HTML wireframes)
 - **Submit round** writes answers locally — no paste by default
 - Agent continues after submit via a foreground waiter
-- Final **shared-understanding.html** decision page before implementation
+- Dark theme, with unsaved answers kept in `localStorage`
+- Sessions live in `~/.grill-me-html/in-progress/<slug>/` and move to `archived/` on **Mark completed**
+- After that, the agent asks where in the current repo to save a markdown copy, and suggests the filename
 
 ## Screenshots
 
@@ -37,14 +39,12 @@ An agent skill that turns plan/design decisions into browser questionnaires:
 ## Install
 
 ```bash
-npx skills add wuyuxiangX/grill-me-html -y
+npx skills add oup-kenlo/grill-me-html -g -a cursor -y
 ```
 
-Global:
+`-g` installs the skill for every project on this machine (`~/.cursor/skills/`). It does not put session files in the skill directory. Those go to `~/.grill-me-html/`.
 
-```bash
-npx skills add wuyuxiangX/grill-me-html -g -y
-```
+Without `-g`, the same command installs into the current repo only.
 
 ## Requirements
 
@@ -55,18 +55,22 @@ npx skills add wuyuxiangX/grill-me-html -g -y
 ## Usage
 
 1. Describe a plan or design.
-2. The agent writes `.grill-me-html/config-01.json`.
-3. The agent runs (foreground, long timeout):
+2. The agent suggests a session folder such as `aim-in-one-job-queue` and waits.
+3. The agent writes `~/.grill-me-html/in-progress/<slug>/config-01.json`.
+4. The agent runs (foreground, long timeout):
 
 ```bash
 node "$SKILL_DIR/scripts/run-round.mjs" \
   --round 1 \
-  --config .grill-me-html/config-01.json
+  --session <slug> \
+  --config "$HOME/.grill-me-html/in-progress/<slug>/config-01.json"
 ```
 
-4. Answer in the browser and click **Submit round**.
-5. The process exits `0` and prints `RESULT {...}`.
-6. The agent reads `.grill-me-html/answers-01.json` and starts the next round, or finishes with a shared-understanding summary.
+5. Answer in the browser and click **Submit round**. Refresh keeps the in-progress draft.
+6. The process exits `0` and prints `RESULT {...}`.
+7. The agent reads `answers-01.json` and starts the next round, or opens `shared-understanding.html`.
+8. **Mark completed** moves that folder to `~/.grill-me-html/archived/<slug>/`.
+9. The agent suggests a repo path and filename, for example `docs/plans/2026-10-02-job-queue.md`, and writes the copy only after you accept it.
 
 Details:
 

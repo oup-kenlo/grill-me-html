@@ -6,20 +6,22 @@
   <title>Shared understanding</title>
   <style>
     :root {
-      --bg: #fafafa;
-      --card: #ffffff;
-      --muted: #f5f5f5;
-      --ink: #0a0a0a;
-      --ink-muted: #737373;
-      --ink-subtle: #a3a3a3;
-      --line: #e5e5e5;
-      --line-hover: #d4d4d4;
-      --accent: #0a0a0a;
-      --accent-fg: #ffffff;
-      --success: #16a34a;
-      --success-bg: #f0fdf4;
-      --warning: #b45309;
-      --warning-bg: #fffbeb;
+      color-scheme: dark;
+      --bg: #121212;
+      --card: #1c1c1c;
+      --muted: #242424;
+      --ink: #f5f5f5;
+      --ink-muted: #a3a3a3;
+      --ink-subtle: #737373;
+      --line: #2e2e2e;
+      --line-hover: #3f3f3f;
+      --accent: #f5f5f5;
+      --accent-fg: #121212;
+      --accent-hover: #d4d4d4;
+      --success: #4ade80;
+      --success-bg: #14281c;
+      --warning: #fbbf24;
+      --warning-bg: #2a2112;
       --radius-sm: 4px;
       --radius-md: 8px;
       --radius-full: 9999px;
@@ -341,7 +343,37 @@
     }
 
     .tree-node.settled {
-      background: #fcfcfc;
+      background: var(--muted);
+    }
+
+    .session-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      align-items: center;
+      margin-top: var(--space-md);
+    }
+
+    .session-actions button {
+      font: inherit;
+      min-height: 36px;
+      padding: 0 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: var(--accent-fg);
+      cursor: pointer;
+    }
+
+    .session-actions button.secondary {
+      background: var(--card);
+      color: var(--ink);
+      border-color: var(--line);
+    }
+
+    .session-note {
+      color: var(--ink-muted);
+      font-size: 14px;
     }
 
     .tree-label {
@@ -714,8 +746,13 @@ img,svg,video,canvas{max-width:100%;height:auto}
                 <strong>Before implementation:</strong>
                 ${escapeHtml(
                   config.confirmPrompt ||
-                    'Confirm this shared understanding, or list the changes you want.'
+                    "Mark completed when this shared understanding is right. The agent will then ask where to save a copy in the repo."
                 )}
+              </div>
+              <div class="session-actions">
+                <button type="button" id="markCompleted">Mark completed</button>
+                <button type="button" class="secondary" id="returnInProgress" hidden>Return to in-progress</button>
+                <span class="session-note" id="sessionNote"></span>
               </div>
             </section>
 
@@ -802,6 +839,71 @@ img,svg,video,canvas{max-width:100%;height:auto}
 
         for (const m of mountIds) {
           mountVisual(document.getElementById(m.id), m.item);
+        }
+        wireSessionActions();
+      }
+
+      function sessionHandoff() {
+        const live = window.GRILL_ME_HTML_SESSION;
+        return live && typeof live === "object" ? live : {};
+      }
+
+      async function postSession(url) {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: "{}"
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || data.ok === false) {
+          throw new Error(data.message || data.error || `HTTP ${response.status}`);
+        }
+        return data;
+      }
+
+      function wireSessionActions() {
+        const handoff = sessionHandoff();
+        const completeButton = document.getElementById("markCompleted");
+        const reopenButton = document.getElementById("returnInProgress");
+        const note = document.getElementById("sessionNote");
+        const archived = handoff.status === "archived";
+        if (completeButton) completeButton.hidden = archived;
+        if (reopenButton) reopenButton.hidden = !archived;
+        if (!handoff.completeUrl && note) {
+          note.textContent =
+            "Open this page from the agent so Mark completed can file the session.";
+        }
+
+        async function run(url, pending, success) {
+          if (!url) return;
+          if (note) note.textContent = pending;
+          try {
+            const data = await postSession(url);
+            if (note) note.textContent = data.message || success;
+          } catch (error) {
+            if (note) {
+              note.textContent = String(error && error.message ? error.message : error);
+            }
+          }
+        }
+
+        if (completeButton) {
+          completeButton.addEventListener("click", () =>
+            run(
+              handoff.completeUrl,
+              "Marking completed…",
+              "Marked completed."
+            )
+          );
+        }
+        if (reopenButton) {
+          reopenButton.addEventListener("click", () =>
+            run(
+              handoff.reopenUrl,
+              "Returning to in-progress…",
+              "Returned to in-progress."
+            )
+          );
         }
       }
 

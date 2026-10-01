@@ -6,12 +6,14 @@ description: >
   generate a browser questionnaire with soft branching, recommended answers,
   preview-pane visual options (wireframes / architecture sketches),
   review, and one-click Submit that writes answers back for the next round.
-  When the frontier is empty, generate an offline shared-understanding.html
-  decision page and wait for confirmation before implementing.
+  When the frontier is empty, generate shared-understanding.html and wait
+  until the user marks the session completed, then ask where in the current
+  repo to save a copy and suggest the filename.
   Use when the user says "grill me html", "html grill", "grill-me-html",
   "grill me in a questionnaire", "ask me in the browser",
   "HTML questionnaire interview", "adaptive grill",
   or wants design decisions collected like a form instead of chat/terminal Q&A.
+  Do not use for a chat-only /grill-me.
   Prefer type "preview" when options should be seen (UI layout, IA, architecture).
   Reach shared understanding first; do not implement until the user confirms.
 license: MIT
@@ -42,7 +44,9 @@ No paste step by default.
 4. Block on the local waiter until Submit writes answers.
 5. Read answers, recompute the tree, open the next round.
 6. Stop when the frontier is empty. Build `shared-understanding.html`, open it,
-   and wait for confirmation before acting.
+   and wait until the user clicks **Mark completed**.
+7. Ask where the current repo should keep a copy, with a suggested path and filename.
+   Write nothing into the repo until the user answers.
 
 ## Core model
 
@@ -99,16 +103,18 @@ Resolve `SKILL_DIR` as the directory that contains this `SKILL.md`.
 ```bash
 node "$SKILL_DIR/scripts/run-round.mjs" \
   --round 1 \
-  --config .grill-me-html/config-01.json
+  --session <slug> \
+  --config "$HOME/.grill-me-html/in-progress/<slug>/config-01.json"
 ```
 
 Effects:
 
-- injects config into the template
-- writes `.grill-me-html/round-01.html`
+- injects config into the dark questionnaire template
+- writes `~/.grill-me-html/in-progress/<slug>/round-01.html`
 - opens browser / serves localhost
+- keeps unsaved answers in `localStorage` for that session and round
 - blocks until Submit
-- writes `.grill-me-html/answers-01.json`
+- writes `answers-01.json` in that same session folder
 - prints `RESULT {"ok":true,"answers":"...","next":"read_answers_and_continue"}`
 - exits 0
 
@@ -125,7 +131,7 @@ Then you:
 - Long timeout (30–60+ minutes is fine).
 - Exit 0 ⇒ continue immediately. Do not ask “are you done?” / “提交了吗”.
 - Prefer `run-round.mjs` over hand-rolled open/copy/paste.
-- Workdir is agent-agnostic: `.grill-me-html/`.
+- Session files live in `~/.grill-me-html/in-progress/<slug>/`, not in the repo.
 
 Fallback only if the waiter cannot run:
 
@@ -134,12 +140,25 @@ Fallback only if the waiter cannot run:
 
 ## Workflow
 
-### 0. Load context
+### 0. Suggest the session folder, then wait
+
+Before writing any round, suggest one folder name and wait for the user to accept or replace it.
+
+- Form: `<repo-folder>-<short-topic>`, lowercase, hyphens only. Example: `aim-in-one-job-queue`.
+- Repo folder is the basename of the current working directory.
+- Short topic is a few words from what the user wants to grill.
+- Put the suggestion in one line and say it will live at `~/.grill-me-html/in-progress/<slug>/`.
+- Do not create the folder, and do not start round 1, until the user accepts or gives another name.
+- If that slug is already in `in-progress/`, ask whether to continue it.
+- If it is only in `archived/`, ask whether to return it to in-progress or pick a new name.
+- After acceptance, keep this slug for every round, for `localStorage`, and for archive moves. Do not rename it later.
+
+### 1. Load context
 
 - Read the plan and relevant files.
 - Look up facts yourself. Never ask for discoverable facts.
 
-### 1. Maintain tree state
+### 2. Maintain tree state
 
 ```text
 Settled:    decisions already made
@@ -148,9 +167,9 @@ Blocked:    waiting on unsettled parents
 Open facts: research in flight
 ```
 
-### 2. Author the round config
+### 3. Author the round config
 
-Write `.grill-me-html/config-XX.json`.
+Write `~/.grill-me-html/in-progress/<slug>/config-XX.json`.
 
 Round config should include:
 
@@ -187,12 +206,13 @@ Rules:
 
 Schema: `references/config-schema.md`.
 
-### 3. Run the round (blocking)
+### 4. Run the round (blocking)
 
 ```bash
 node "$SKILL_DIR/scripts/run-round.mjs" \
   --round N \
-  --config .grill-me-html/config-NN.json
+  --session <slug> \
+  --config "$HOME/.grill-me-html/in-progress/<slug>/config-NN.json"
 ```
 
 Chat stays short:
@@ -202,9 +222,9 @@ Round N frontier: <layer name> (K questions)
 Opened in browser. Click Submit round when done — no paste needed.
 ```
 
-### 4. Ingest answers
+### 5. Ingest answers
 
-Read `.grill-me-html/answers-NN.json`.
+Read `~/.grill-me-html/in-progress/<slug>/answers-NN.json`.
 
 Rules:
 
@@ -212,23 +232,53 @@ Rules:
 2. `skipped` may mean hidden-by-branch (N/A) or unanswered (still open).
 3. Never treat a recommendation as chosen unless selected.
 
-### 5. Next round or finish
+### 6. Next round or finish
 
 - Unblock dependents, author next config, run next `run-round.mjs`
 - If user reverses an upstream decision, invalidate dependent branches
 - If frontier empty:
-  1. Write `.grill-me-html/summary.json` from settled decisions
-  2. Build the decision page:
+  1. Write `~/.grill-me-html/in-progress/<slug>/summary.json` from settled decisions.
+  2. Build the decision page, then serve it and block:
 
 ```bash
 node "$SKILL_DIR/scripts/build-summary.mjs" \
-  --config .grill-me-html/summary.json \
-  --out .grill-me-html/shared-understanding.html \
-  --open
+  --session <slug> \
+  --config "$HOME/.grill-me-html/in-progress/<slug>/summary.json"
+
+node "$SKILL_DIR/scripts/serve-summary.mjs" \
+  --session <slug>
 ```
 
-  3. Ask the user to confirm the shared understanding
-  4. Only then implement
+  3. **Mark completed** moves the whole session folder to `~/.grill-me-html/archived/<slug>/`. Exit 0 with `next: ask_project_save_location`.
+  4. **Return to in-progress** moves it back. Exit 0 with `next: resume_interview`, then keep grilling.
+  5. On `ask_project_save_location`, run:
+
+```bash
+node "$SKILL_DIR/scripts/suggest-save.mjs" --session <slug>
+```
+
+     Show the suggested repo path, including the filename, and wait. Example question: save a markdown copy at `docs/plans/2026-10-02-job-queue.md`? The user may change the directory (`docs/plans`, `docs/plan`, `docs/reference`, or another path) and the filename.
+  6. Write the copy only after they answer, and only at the path they chose:
+
+```bash
+node "$SKILL_DIR/scripts/render-markdown.mjs" \
+  --session <slug> \
+  --out docs/plans/2026-10-02-job-queue.md
+```
+
+     If they say not to copy it into the repo, leave the archived HTML where it is.
+  7. Do not write `CONTEXT.md` unless they name that file.
+  8. To undo Mark completed later:
+
+```bash
+node "$SKILL_DIR/scripts/move-session.mjs" --session <slug> --to in-progress
+```
+
+     Or open the session index, which lists both folders and has the same two actions:
+
+```bash
+node "$SKILL_DIR/scripts/serve-index.mjs"
+```
 
 ## UI already enforced by the template
 
@@ -241,7 +291,9 @@ node "$SKILL_DIR/scripts/build-summary.mjs" \
 - Strong selected state + toast on choice
 - `preview` questions: option list + live preview pane (hover/focus updates; click commits)
 - HTML previews render in sandboxed iframes (no scripts)
-- Final **shared-understanding** page for confirmation before implementation
+- Final **shared-understanding** page with **Mark completed** and **Return to in-progress**
+- Dark theme by default
+- Unsaved round answers restored from `localStorage` after refresh
 
 ## Files
 
@@ -251,17 +303,25 @@ node "$SKILL_DIR/scripts/build-summary.mjs" \
 | `templates/shared-understanding.html` | Final decision / confirmation page |
 | `scripts/run-round.mjs` | **Primary** one-shot: inject → serve → wait → answers |
 | `scripts/serve-and-collect.mjs` | Lower-level waiter used by run-round |
-| `scripts/build-summary.mjs` | Build shared-understanding.html from summary.json |
+| `scripts/build-summary.mjs` | Build shared-understanding.html inside the session folder |
+| `scripts/serve-summary.mjs` | Wait for Mark completed or Return to in-progress |
+| `scripts/serve-index.mjs` | List in-progress and archived sessions |
+| `scripts/move-session.mjs` | Move a session between those two folders |
+| `scripts/suggest-save.mjs` | Suggest the repo path and filename |
+| `scripts/render-markdown.mjs` | Write the markdown copy into the repo |
 | `references/config-schema.md` | Config + export + summary schema |
 | `references/auto-continue.md` | Portable submit→continue contract |
-| `.grill-me-html/` | Runtime workdir in the target project |
+| `~/.grill-me-html/in-progress/<slug>/` | Live session: `config-01.json`, `round-01.html`, `answers-01.json`, `shared-understanding.html` |
+| `~/.grill-me-html/archived/<slug>/` | Same files after Mark completed |
 
 ## Do not
 
 - Generate one giant questionnaire for every future branch
 - Ask for discoverable facts
 - Treat recommendations as chosen answers
-- Implement before confirmation
+- Implement before the user has marked the session completed and answered the save question
+- Write the shared understanding into the repo, or into `CONTEXT.md`, before they choose a path
+- Put session files in the repo's `.grill-me-html/` directory
 - Background the waiter and hope the browser wakes you
 - Require paste-JSON when the waiter can run
 - Show two identical Review buttons on the last question

@@ -215,8 +215,8 @@ When the frontier is empty, generate a final offline decision document:
 
 ```bash
 node "$SKILL_DIR/scripts/build-summary.mjs" \
-  --config .grill-me-html/summary.json \
-  --out .grill-me-html/shared-understanding.html
+  --session <slug> \
+  --config "$HOME/.grill-me-html/in-progress/<slug>/summary.json"
 ```
 
 Injected as `window.SUMMARY_CONFIG` into `templates/shared-understanding.html`.

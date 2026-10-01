@@ -33,15 +33,16 @@ Resolve `SKILL_DIR` as the directory containing this skill’s `SKILL.md`.
 ```bash
 node "$SKILL_DIR/scripts/run-round.mjs" \
   --round 1 \
-  --config .grill-me-html/config-01.json
+  --session <slug> \
+  --config "$HOME/.grill-me-html/in-progress/<slug>/config-01.json"
 ```
 
 What happens:
 
 1. inject config into `templates/questionnaire.html`
-2. write `.grill-me-html/round-01.html`
+2. write `~/.grill-me-html/in-progress/<slug>/round-01.html`
 3. block on local collector
-4. write `.grill-me-html/answers-01.json`
+4. write `answers-01.json` in that session folder
 5. print `RESULT {...}`
 6. exit 0
 
@@ -49,8 +50,8 @@ Lower-level equivalent:
 
 ```bash
 node "$SKILL_DIR/scripts/serve-and-collect.mjs" \
-  --html .grill-me-html/round-01.html \
-  --out  .grill-me-html/answers-01.json
+  --html "$HOME/.grill-me-html/in-progress/<slug>/round-01.html" \
+  --out  "$HOME/.grill-me-html/in-progress/<slug>/answers-01.json"
 ```
 
 ## Rules for every agent runtime
@@ -112,16 +113,20 @@ Agents may parse this line, or simply use the known `--out` path.
 
 ## Workdir convention
 
-Default workdir is project-local and agent-agnostic:
+Session files live in the user's home directory, one folder per grill. The skill install location is separate from this data directory.
 
 ```text
-.grill-me-html/
-  config-01.json
-  round-01.html
-  answers-01.json
-  config-02.json
-  round-02.html
-  answers-02.json
+~/.grill-me-html/
+  in-progress/<slug>/
+    config-01.json
+    round-01.html
+    answers-01.json
+    summary.json
+    shared-understanding.html
+  archived/<slug>/
+    (same files after Mark completed)
 ```
 
-Do not require a platform-private path.
+`<slug>` is agreed before round 1, for example `aim-in-one-job-queue`. File names inside the session stay `answers-01.json` and `shared-understanding.html`.
+
+Mark completed moves the session directory from `in-progress/` to `archived/`. Return to in-progress moves it back. Copying into the current repo happens only after Mark completed, at the path the user accepts.

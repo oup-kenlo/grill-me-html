@@ -29,6 +29,8 @@ import path from "node:path";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
+import { ensureSession, padRound } from "./session-store.mjs";
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SKILL_ROOT = path.resolve(__dirname, "..");
 const DEFAULT_TEMPLATE = path.join(SKILL_ROOT, "templates", "questionnaire.html");
@@ -36,6 +38,7 @@ const COLLECTOR = path.join(__dirname, "serve-and-collect.mjs");
 
 function usage(code = 0) {
   const text = `Usage:
+  node run-round.mjs --round <n> --session <slug> --config <config.json> [--template <html>] [--port <n>] [--no-open] [--timeout-ms <n>]
   node run-round.mjs --round <n> --config <config.json> [--dir <workdir>] [--template <html>] [--port <n>] [--no-open] [--timeout-ms <n>]
   node run-round.mjs --html <file.html> --out <answers.json> [--port <n>] [--no-open] [--timeout-ms <n>]
 `;
@@ -47,6 +50,7 @@ function usage(code = 0) {
 function parseArgs(argv) {
   const args = {
     round: null,
+    session: null,
     config: null,
     dir: null,
     template: DEFAULT_TEMPLATE,
@@ -60,6 +64,7 @@ function parseArgs(argv) {
     const a = argv[i];
     if (a === "--help" || a === "-h") usage(0);
     else if (a === "--round") args.round = Number(argv[++i]);
+    else if (a === "--session") args.session = argv[++i];
     else if (a === "--config") args.config = argv[++i];
     else if (a === "--dir") args.dir = argv[++i];
     else if (a === "--template") args.template = argv[++i];
@@ -74,10 +79,6 @@ function parseArgs(argv) {
     }
   }
   return args;
-}
-
-function padRound(n) {
-  return String(n).padStart(2, "0");
 }
 
 function defaultWorkDir() {
@@ -149,9 +150,6 @@ async function main() {
 
   if (!htmlPath) {
     if (!args.config || !round) usage(1);
-    const workDir = path.resolve(args.dir || defaultWorkDir());
-    fs.mkdirSync(workDir, { recursive: true });
-
     const configPath = path.resolve(args.config);
     if (!fs.existsSync(configPath)) {
       process.stderr.write(`Config not found: ${configPath}\n`);
@@ -165,6 +163,23 @@ async function main() {
     const configObj = JSON.parse(fs.readFileSync(configPath, "utf8"));
     if (!configObj.round) configObj.round = round;
     if (!configObj.skill) configObj.skill = "grill-me-html";
+    let workDir;
+    if (args.session) {
+      configObj.sessionSlug = args.session;
+      try {
+        const session = ensureSession(args.session, {
+          title: configObj.title || args.session,
+          repo: process.cwd(),
+        });
+        workDir = session.dir;
+      } catch (error) {
+        process.stderr.write(`${error.message}\n`);
+        process.exit(1);
+      }
+    } else {
+      workDir = path.resolve(args.dir || defaultWorkDir());
+      fs.mkdirSync(workDir, { recursive: true });
+    }
 
     const templateHtml = fs.readFileSync(path.resolve(args.template), "utf8");
     const pageHtml = injectConfig(templateHtml, configObj);

@@ -18,6 +18,8 @@ import path from "node:path";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
+import { findSession } from "./session-store.mjs";
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SKILL_ROOT = path.resolve(__dirname, "..");
 const DEFAULT_TEMPLATE = path.join(
@@ -28,7 +30,7 @@ const DEFAULT_TEMPLATE = path.join(
 
 function usage(code = 0) {
   const text = `Usage:
-  node build-summary.mjs --config <summary.json> [--out <file.html>] [--template <html>] [--open]
+  node build-summary.mjs --config <summary.json> [--session <slug>] [--out <file.html>] [--template <html>] [--open]
 `;
   if (code === 0) process.stdout.write(text);
   else process.stderr.write(text);
@@ -38,6 +40,7 @@ function usage(code = 0) {
 function parseArgs(argv) {
   const args = {
     config: null,
+    session: null,
     out: null,
     template: DEFAULT_TEMPLATE,
     open: false,
@@ -46,6 +49,7 @@ function parseArgs(argv) {
     const a = argv[i];
     if (a === "--help" || a === "-h") usage(0);
     else if (a === "--config") args.config = argv[++i];
+    else if (a === "--session") args.session = argv[++i];
     else if (a === "--out") args.out = argv[++i];
     else if (a === "--template") args.template = argv[++i];
     else if (a === "--open") args.open = true;
@@ -57,7 +61,14 @@ function parseArgs(argv) {
   return args;
 }
 
-function defaultOutPath() {
+function defaultOutPath(session) {
+  if (session) {
+    const found = findSession(session);
+    if (!found) {
+      throw new Error(`Session not found: ${session}`);
+    }
+    return path.join(found.dir, "shared-understanding.html");
+  }
   return path.resolve(process.cwd(), ".grill-me-html", "shared-understanding.html");
 }
 
@@ -97,7 +108,7 @@ function main() {
 
   const configPath = path.resolve(args.config);
   const templatePath = path.resolve(args.template);
-  const outPath = path.resolve(args.out || defaultOutPath());
+  const outPath = path.resolve(args.out || defaultOutPath(args.session));
 
   if (!fs.existsSync(configPath)) {
     process.stderr.write(`Config not found: ${configPath}\n`);
@@ -113,12 +124,20 @@ function main() {
   if (!configObj.generatedAt) configObj.generatedAt = new Date().toISOString();
   if (!configObj.status) configObj.status = "ready";
   if (!Array.isArray(configObj.decisions)) configObj.decisions = [];
+  if (args.session) configObj.sessionSlug = args.session;
 
   const templateHtml = fs.readFileSync(templatePath, "utf8");
   const pageHtml = injectConfig(templateHtml, configObj);
 
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, pageHtml, "utf8");
+  if (args.session) {
+    const found = findSession(args.session);
+    const summaryDest = path.join(found.dir, "summary.json");
+    if (path.resolve(configPath) !== path.resolve(summaryDest)) {
+      fs.copyFileSync(configPath, summaryDest);
+    }
+  }
 
   process.stdout.write(`SUMMARY ${outPath}\n`);
   process.stdout.write(

@@ -6,21 +6,23 @@
   <title>Grill Me HTML</title>
   <style>
     :root {
-      --bg: #fafafa;
-      --card: #ffffff;
-      --muted: #f5f5f5;
-      --ink: #0a0a0a;
-      --ink-muted: #737373;
-      --ink-subtle: #a3a3a3;
-      --line: #e5e5e5;
-      --line-hover: #d4d4d4;
-      --accent: #0a0a0a;
-      --accent-fg: #ffffff;
-      --success: #16a34a;
-      --warning: #b45309;
-      --error: #dc2626;
-      --error-bg: #fef2f2;
-      --error-line: #fecaca;
+      color-scheme: dark;
+      --bg: #121212;
+      --card: #1c1c1c;
+      --muted: #242424;
+      --ink: #f5f5f5;
+      --ink-muted: #a3a3a3;
+      --ink-subtle: #737373;
+      --line: #2e2e2e;
+      --line-hover: #3f3f3f;
+      --accent: #f5f5f5;
+      --accent-fg: #121212;
+      --accent-hover: #d4d4d4;
+      --success: #4ade80;
+      --warning: #fbbf24;
+      --error: #f87171;
+      --error-bg: #2a1515;
+      --error-line: #5c2a2a;
       --radius-sm: 4px;
       --radius-md: 8px;
       --radius-full: 9999px;
@@ -398,13 +400,13 @@
       overflow: auto;
       padding: var(--space-md);
       background:
-        linear-gradient(45deg, #f3f3f3 25%, transparent 25%),
-        linear-gradient(-45deg, #f3f3f3 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, #f3f3f3 75%),
-        linear-gradient(-45deg, transparent 75%, #f3f3f3 75%);
+        linear-gradient(45deg, #2a2a2a 25%, transparent 25%),
+        linear-gradient(-45deg, #2a2a2a 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #2a2a2a 75%),
+        linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
       background-size: 16px 16px;
       background-position: 0 0, 0 8px, 8px -8px, -8px 0;
-      background-color: #fafafa;
+      background-color: #161616;
     }
 
     .preview-empty {
@@ -633,8 +635,8 @@
     }
 
     .btn.primary:hover:not(:disabled) {
-      background: #262626;
-      border-color: #262626;
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
     }
 
     .btn.ghost {
@@ -711,8 +713,8 @@
       line-height: 1.55;
       white-space: pre-wrap;
       word-break: break-word;
-      background: var(--ink);
-      color: #fafafa;
+      background: #0e0e0e;
+      color: #f5f5f5;
       border-radius: var(--radius-md);
       padding: var(--space-md);
       max-height: 280px;
@@ -957,7 +959,8 @@
         focusValue: null, // option currently shown in preview pane
         toastTimer: null,
         submitting: false,
-        submitResult: null
+        submitResult: null,
+        ready: false
       };
 
       const el = {
@@ -987,6 +990,59 @@
         return state.answers[id] || { values: [], customText: "", note: "" };
       }
 
+      function draftKey() {
+        const session =
+          (state.config && state.config.sessionSlug) ||
+          (state.config && state.config.title) ||
+          "draft";
+        const round = String((state.config && state.config.round) || 1).padStart(2, "0");
+        return `grill-me-html:${session}:round-${round}`;
+      }
+
+      function persistDraft() {
+        if (!state.ready) return;
+        if (state.mode === "done") {
+          clearDraft();
+          return;
+        }
+        try {
+          localStorage.setItem(
+            draftKey(),
+            JSON.stringify({
+              index: state.index,
+              mode: state.mode === "done" ? "review" : state.mode,
+              answers: state.answers,
+              savedAt: new Date().toISOString()
+            })
+          );
+        } catch (_) {
+          /* private mode or a full quota should not block the interview */
+        }
+      }
+
+      function restoreDraft() {
+        try {
+          const raw = localStorage.getItem(draftKey());
+          if (!raw) return;
+          const data = JSON.parse(raw);
+          if (!data || !data.answers || typeof data.answers !== "object") return;
+          state.answers = data.answers;
+          if (Number.isFinite(data.index)) state.index = data.index;
+          if (data.mode === "review" || data.mode === "question") state.mode = data.mode;
+          toast("Restored unsaved answers");
+        } catch (_) {
+          /* ignore a corrupt draft and start this round clean */
+        }
+      }
+
+      function clearDraft() {
+        try {
+          localStorage.removeItem(draftKey());
+        } catch (_) {
+          /* ignore */
+        }
+      }
+
       function setAnswer(id, patch) {
         const prev = getAnswer(id);
         state.answers[id] = {
@@ -995,6 +1051,7 @@
             patch.customText !== undefined ? patch.customText : prev.customText || "",
           note: patch.note !== undefined ? patch.note : prev.note || ""
         };
+        persistDraft();
       }
 
       function evalCondition(cond) {
@@ -1372,6 +1429,7 @@ img, svg, video, canvas { max-width: 100%; height: auto; }
                 data.message ||
                 "Answers sent. You can close this tab — the agent will continue."
             };
+            clearDraft();
             state.mode = "done";
             toast("Submitted to agent");
           } catch (err) {
@@ -1826,6 +1884,7 @@ img, svg, video, canvas { max-width: 100%; height: auto; }
       function render() {
         pruneInvisibleAnswers();
         ensureIndexInRange();
+        persistDraft();
         el.title.textContent = state.config.title || "Grill Me HTML";
         el.subtitle.textContent = state.config.subtitle || "";
         el.roundBadge.innerHTML = `Round <strong>${
@@ -1858,6 +1917,8 @@ img, svg, video, canvas { max-width: 100%; height: auto; }
           }
         }
 
+        restoreDraft();
+        state.ready = true;
         render();
       }
 
